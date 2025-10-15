@@ -2,6 +2,16 @@
 // chatbot.php - AI-POWERED CHAT INTERFACE
 session_start();
 
+// Check if user is logged in
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
+    header('Location: index.html');
+    exit();
+}
+
+// Get user information
+$currentUserId = $_SESSION['user_id'];
+$currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
+
 // Enable error reporting for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -24,8 +34,7 @@ class AIChatSystem {
         ];
 
         // --- 2. Gemini API Key Configuration ---
-        // REPLACE 'AIzaSyDqjHK3PUeV8hlYkCr-N4xAQwYw7gmP20Q' with your ACTUAL API key.
-        $this->gemini_api_key = 'AIzaSyDqjHK3PUeV8hlYkCr-N4xAQwYw7gmP20Q'; // ⬅️ **ENSURE THIS IS CORRECT**
+        $this->gemini_api_key = 'AIzaSyDqjHK3PUeV8hlYkCr-N4xAQwYw7gmP20Q';
     }
     
     public function getDBConnection() {
@@ -48,12 +57,7 @@ class AIChatSystem {
         }
     }
     
-    /**
-     * Executes the Python AI script, injects the API key, and isolates the final AI response.
-     * FIX: Uses Windows 'set' command syntax for environment variables.
-     */
     public function runPythonAI($script_path, $args = []) {
-        // Pass Gemini API key and DB credentials using Windows 'set' syntax
         $env_prefix = "set GEMINI_API_KEY=" . escapeshellarg($this->gemini_api_key) . " && ";
         $env_prefix .= "set MYSQL_HOST=" . escapeshellarg($this->db_config['host']) . " && ";
         $env_prefix .= "set MYSQL_USER=" . escapeshellarg($this->db_config['user']) . " && ";
@@ -68,31 +72,25 @@ class AIChatSystem {
             $full_command .= " " . escapeshellarg($arg);
         }
 
-        // Pipe stderr to stdout (2>&1) to capture errors and logs
         $full_command .= " 2>&1"; 
 
         $output_lines = [];
         $exit_code = 0;
         
-        // Execute the command
         exec($full_command, $output_lines, $exit_code);
         
         $raw_output = implode("\n", $output_lines);
 
-        // --- FIX: ISOLATE THE RESPONSE ---
         $cleaned_lines = [];
         $start_capturing = false;
         
         foreach($output_lines as $line) {
-            // Look for the last clear log indicator before the AI response starts
             if (strpos($line, '🤖 Analyzing results with AI...') !== false) {
                 $start_capturing = true; 
                 continue;
             }
             
-            // Start capturing only after the final log line
             if ($start_capturing) {
-                 // Skip any warning/error log lines that might follow the main content start
                  if (preg_match('/^(WARNING|E\d{4})/', trim($line))) {
                      continue; 
                  }
@@ -102,7 +100,6 @@ class AIChatSystem {
         
         $final_response = trim(implode("\n", $cleaned_lines));
         
-        // 4. Check for critical failures
         if ($exit_code !== 0 || empty($final_response) || 
             strpos($final_response, '❌') !== false || 
             strlen($final_response) < 10) { 
@@ -110,7 +107,6 @@ class AIChatSystem {
             error_log("Python AI failed (Exit: $exit_code). Full Output: \n{$raw_output}");
             
             if ($exit_code !== 0) {
-                 // Return the raw output for debugging
                  return "Execution Error: Python script exited with code {$exit_code}. Raw output:\n{$raw_output}";
             }
             return false;
@@ -234,51 +230,206 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EEE Placement AI Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #1a73e8;
-            --secondary: #34a853;
-            --accent: #ea4335;
-            --dark: #202124;
-            --light: #f8f9fa;
-        }
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
         }
         
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, var(--primary), #0d47a1);
+        /* Navbar Styles - Matching dashboard.php */
+        .navbar {
+            background-color: #2c3e50;
             color: white;
-            padding: 30px;
-            text-align: center;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         
-        .header h1 {
-            font-size: 2.5rem;
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            height: 50px;
+            margin-right: 15px;
+        }
+        
+        .nav-title {
+            font-size: 22px;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background-color: #34495e;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        /* Mobile Menu Overlay */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        
+        .mobile-menu-content {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background: #2c3e50;
+            transition: right 0.3s ease;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .mobile-menu.active {
+            display: block;
+        }
+        
+        .mobile-menu.active .mobile-menu-content {
+            right: 0;
+        }
+        
+        .mobile-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .mobile-menu-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .mobile-nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 12px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .mobile-nav-links a:hover {
+            background-color: #34495e;
+        }
+        
+        .mobile-user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #34495e;
+            border-radius: 8px;
+        }
+        
+        .mobile-user-info img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-header h1 {
+            color: #2c3e50;
+            font-size: 32px;
             margin-bottom: 10px;
         }
         
+        .page-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+        }
+        
         .ai-badge {
-            background: var(--secondary);
+            background: #27ae60;
+            color: white;
             padding: 5px 15px;
             border-radius: 20px;
             font-size: 0.9rem;
@@ -286,20 +437,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             margin-top: 10px;
         }
         
+        /* Main Content */
         .app-container {
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 320px 1fr;
+            gap: 25px;
             min-height: 70vh;
         }
         
         .sidebar {
-            background: var(--light);
+            background: white;
             padding: 25px;
-            border-right: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+        
+        .sidebar h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
         }
         
         .main-content {
+            background: white;
             padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
         }
@@ -314,19 +480,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            background: #fafafa;
-            border-radius: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
             margin-bottom: 20px;
-            max-height: 500px; 
+            max-height: 550px;
+            border: 1px solid #ecf0f1;
         }
         
         .message {
             margin-bottom: 20px;
             padding: 15px 20px;
-            border-radius: 15px;
+            border-radius: 12px;
             max-width: 80%;
             animation: fadeIn 0.3s ease;
-            white-space: pre-wrap; 
+            white-space: pre-wrap;
         }
         
         @keyframes fadeIn {
@@ -335,7 +502,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
         
         .message.user {
-            background: var(--primary);
+            background: #3498db;
             color: white;
             margin-left: auto;
             border-bottom-right-radius: 5px;
@@ -343,13 +510,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         
         .message.assistant {
             background: white;
-            border: 2px solid #e0e0e0;
+            border: 2px solid #ecf0f1;
             border-bottom-left-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         
         .message.assistant.ai-response {
-            border-left: 4px solid var(--primary);
+            border-left: 4px solid #3498db;
         }
         
         .chat-input {
@@ -360,34 +527,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         .chat-input input {
             flex: 1;
             padding: 15px 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
             font-size: 16px;
             outline: none;
             transition: border-color 0.3s;
         }
         
         .chat-input input:focus {
-            border-color: var(--primary);
+            border-color: #3498db;
         }
         
         .chat-input button {
             padding: 15px 30px;
-            background: var(--primary);
+            background: #3498db;
             color: white;
             border: none;
-            border-radius: 25px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
             transition: background 0.3s;
         }
         
         .chat-input button:hover:not(:disabled) {
-            background: #0d47a1;
+            background: #2980b9;
         }
 
         .chat-input button:disabled {
-            background: #ccc;
+            background: #bdc3c7;
             cursor: not-allowed;
         }
         
@@ -399,17 +566,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         
         .example-btn {
             padding: 12px 15px;
-            background: white;
-            border: 1px solid #e0e0e0;
+            background: #f8f9fa;
+            border: 1px solid #ecf0f1;
             border-radius: 8px;
             cursor: pointer;
             text-align: left;
             transition: all 0.3s;
-            border-left: 4px solid var(--primary);
+            border-left: 4px solid #3498db;
+            color: #2c3e50;
+            font-size: 14px;
         }
         
         .example-btn:hover {
-            background: var(--primary);
+            background: #3498db;
             color: white;
             transform: translateX(5px);
         }
@@ -418,7 +587,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: var(--primary);
+            color: #3498db;
             font-weight: 600;
         }
         
@@ -431,7 +600,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: var(--primary);
+            background: #3498db;
             animation: bounce 1.4s ease-in-out infinite both;
         }
         
@@ -446,16 +615,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         .system-status {
             margin-top: 20px;
             padding: 15px;
-            background: white;
+            background: #f8f9fa;
             border-radius: 8px;
-            border-left: 4px solid var(--secondary);
+            border-left: 4px solid #27ae60;
+        }
+        
+        .system-status h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
         }
         
         .tab-navigation {
             display: flex;
             margin-bottom: 20px;
-            background: var(--light);
-            border-radius: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
             padding: 5px;
         }
         
@@ -464,14 +638,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             padding: 12px;
             border: none;
             background: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s;
             font-weight: 600;
+            color: #7f8c8d;
         }
         
         .tab-btn.active {
-            background: var(--primary);
+            background: #3498db;
             color: white;
         }
         
@@ -486,16 +661,155 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             flex: 1;
         }
 
-        .status-success { color: var(--secondary); font-weight: bold; }
-        .status-error { color: var(--accent); font-weight: bold; }
+        .status-success { color: #27ae60; font-weight: bold; }
+        .status-error { color: #e74c3c; font-weight: bold; }
+        
+        /* Footer */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                order: 2;
+            }
+            
+            .main-content {
+                order: 1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .user-info {
+                display: none;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .container {
+                padding: 0 15px;
+                margin: 20px auto;
+            }
+            
+            .page-header h1 {
+                font-size: 24px;
+            }
+            
+            .page-header p {
+                font-size: 16px;
+            }
+            
+            .chat-messages {
+                max-height: 400px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 12px 15px;
+            }
+            
+            .logo {
+                height: 40px;
+            }
+            
+            .nav-title {
+                font-size: 18px;
+            }
+            
+            .mobile-menu-content {
+                width: 280px;
+            }
+            
+            .chat-input {
+                flex-direction: column;
+            }
+            
+            .chat-input button {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Navbar - Matching dashboard.php -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Itechlogo.png/738px-Itechlogo.png" alt="PSG iTech Logo" class="logo">
+            <span class="nav-title">EEE Department</span>
+        </div>
+        <div class="nav-links">
+            <a href="placement_experience.php"><i class="fas fa-book"></i> PLACED EXPERIENCE</a>
+            <a href="dashboard.php"><i class="fas fa-pencil-alt"></i> PREP TOPICS</a>
+            <?php if (in_array($currentUserType, ['admin', 'faculty'])): ?>
+                <a href="admin_panel.php"><i class="fas fa-user-shield"></i> Admin Panel</a>
+            <?php endif; ?>
+            <a href="logout.php" style="background: #e74c3c;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
+        </div>
+        <div class="user-info">
+            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+            <span><?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?></span>
+            <small style="font-size: 11px; opacity: 0.8;">(<?php echo ucfirst($currentUserType); ?>)</small>
+        </div>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-content">
+            <div class="mobile-menu-header">
+                <h3>Menu</h3>
+                <button class="mobile-menu-close" id="mobileMenuClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mobile-nav-links">
+                <a href="placement_experience.php"><i class="fas fa-book"></i> PLACED EXPERIENCE</a>
+                <a href="dashboard.php"><i class="fas fa-pencil-alt"></i> PREP TOPICS</a>
+                <?php if (in_array($currentUserType, ['admin', 'faculty'])): ?>
+                    <a href="admin_panel.php"><i class="fas fa-user-shield"></i> Admin Panel</a>
+                <?php endif; ?>
+                <a href="logout.php" style="background: #e74c3c;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
+            </div>
+            <div class="mobile-user-info">
+                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+                <div>
+                    <div style="font-weight: bold;"><?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?></div>
+                    <div style="font-size: 14px; color: #bdc3c7;"><?php echo ucfirst($currentUserType); ?></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
     <div class="container">
-        <div class="header">
+        <div class="page-header">
             <h1>🎓 EEE Placement AI Assistant</h1>
-            <p>Powered by Google Gemini - Intelligent Placement Analytics</p>
-            <div class="ai-badge">🤖 FULL AI-POWERED</div>
         </div>
         
         <div class="app-container">
@@ -526,7 +840,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     <h4>🔧 System Status</h4>
                     <div id="db-status" class="status-error">Checking database...</div>
                     <div id="ai-status" class="status-error" style="margin-top: 10px;">Checking AI...</div>
-                    <button onclick="testAI()" style="margin-top: 10px; width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    <button onclick="testAI()" style="margin-top: 10px; width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
                         Test AI System
                     </button>
                 </div>
@@ -556,7 +870,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                                         <span></span>
                                         <span></span>
                                     </span>
-                                    AI Thinking
                                 </span>
                             </button>
                         </div>
@@ -565,8 +878,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 
                 <div id="interview-tab" class="tab-content">
                     <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; flex: 1;">
-                        <div style="background: var(--light); padding: 20px; border-radius: 10px; display: flex; flex-direction: column;">
-                            <h4>🏢 Select Company</h4>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; display: flex; flex-direction: column; border: 1px solid #ecf0f1;">
+                            <h4 style="color: #2c3e50; margin-bottom: 15px;">🏢 Select Company</h4>
                             <div id="company-list" style="margin-top: 15px; overflow-y: auto; flex: 1;">
                                 <div class="ai-thinking">
                                     <span class="ai-dots"><span></span><span></span><span></span></span>
@@ -575,10 +888,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             </div>
                         </div>
                         
-                        <div style="background: white; padding: 20px; border-radius: 10px; border: 2px solid var(--light); overflow-y: auto;">
-                            <h4>🎯 AI-Powered Interview Preparation</h4>
+                        <div style="background: white; padding: 20px; border-radius: 8px; border: 2px solid #ecf0f1; overflow-y: auto;">
+                            <h4 style="color: #2c3e50; margin-bottom: 15px;">🎯 AI-Powered Interview Preparation</h4>
                             <div id="preparation-content">
-                                <p>Select a company from the list to get a detailed, AI-generated personalized interview preparation guide based on available placement data.</p>
+                                <p style="color: #7f8c8d;">Select a company from the list to get a detailed, AI-generated personalized interview preparation guide based on available placement data.</p>
                             </div>
                         </div>
                     </div>
@@ -587,7 +900,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         </div>
     </div>
 
+    <footer>
+        <p>Department of EEE - PSG iTech © 2025. All rights reserved.</p>
+    </footer>
+
     <script>
+        // Mobile menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    mobileMenu.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+
+            if (mobileMenuClose) {
+                mobileMenuClose.addEventListener('click', function() {
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            }
+
+            // Close menu when clicking overlay
+            if (mobileMenu) {
+                mobileMenu.addEventListener('click', function(e) {
+                    if (e.target === mobileMenu) {
+                        mobileMenu.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+
+            // Test system status on page load
+            testAI();
+        });
+
         // AI Chat System JavaScript
         let currentTab = 'chat';
         
@@ -643,10 +994,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     if (data.success) {
                         addMessage(data.response, 'assistant', false, 'ai-response');
                     } else {
-                        // Display the error message from PHP/Python
                         addMessage('❌ ' + data.response, 'assistant', false, 'error-response');
                         
-                        // New: Display the full Python output on the front-end for immediate debugging
                         if (data.response.includes("Execution Error")) {
                            addMessage('<pre style="color:red; background:#ffeeee; padding: 10px; border-radius: 5px;">' + data.response + '</pre>', 'assistant', false, 'error-response');
                         }
@@ -693,7 +1042,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         function testAI() {
             const dbStatus = document.getElementById('db-status');
             const aiStatus = document.getElementById('ai-status');
-            aiStatus.innerHTML = '<div class="ai-thinking">Testing AI System...</div>';
+            
+            if (dbStatus) dbStatus.innerHTML = '<div class="ai-thinking">Testing Database...</div>';
+            if (aiStatus) aiStatus.innerHTML = '<div class="ai-thinking">Testing AI System...</div>';
             
             fetch('', {
                 method: 'POST',
@@ -702,15 +1053,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             })
             .then(response => response.json())
             .then(data => {
-                dbStatus.innerHTML = data.db_message;
-                dbStatus.className = data.db_message.startsWith('✅') ? 'status-success' : 'status-error';
+                if (dbStatus) {
+                    dbStatus.innerHTML = data.db_message;
+                    dbStatus.className = data.db_message.startsWith('✅') ? 'status-success' : 'status-error';
+                }
 
-                aiStatus.innerHTML = data.ai_message;
-                aiStatus.className = data.ai_message.startsWith('✅') ? 'status-success' : 'status-error';
+                if (aiStatus) {
+                    aiStatus.innerHTML = data.ai_message;
+                    aiStatus.className = data.ai_message.startsWith('✅') ? 'status-success' : 'status-error';
+                }
                 
-                // New: Display the full Python output on the front-end for immediate debugging
                 if (data.ai_message.includes("Execution Error")) {
-                    document.getElementById('chat-messages').innerHTML += `<div class="message assistant error-response"><strong>🤖 AI:</strong> <pre style="color:red; background:#ffeeee; padding: 10px; border-radius: 5px;">${data.ai_message}</pre></div>`;
+                    const chatMessages = document.getElementById('chat-messages');
+                    if (chatMessages) {
+                        chatMessages.innerHTML += `<div class="message assistant error-response"><strong>🤖 AI:</strong> <pre style="color:red; background:#ffeeee; padding: 10px; border-radius: 5px;">${data.ai_message}</pre></div>`;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Test AI Error:', error);
+                if (dbStatus) {
+                    dbStatus.innerHTML = '❌ Connection failed';
+                    dbStatus.className = 'status-error';
+                }
+                if (aiStatus) {
+                    aiStatus.innerHTML = '❌ Test failed';
+                    aiStatus.className = 'status-error';
                 }
             });
         }
@@ -718,63 +1086,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         function loadCompanies() {
             const companyList = document.getElementById('company-list');
             
-            companyList.innerHTML = '<div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> Loading companies...</div>';
-            
-            fetch('', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'action=get_companies'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.companies.length > 0) {
-                    let html = '';
-                    data.companies.forEach(company => {
-                        const safeCompanyName = company.replace(/'/g, "\\'"); 
-                        html += `<button class="example-btn" onclick="getInterviewPrep('${safeCompanyName}')" style="margin: 5px 0; width: 100%;">${company}</button>`;
-                    });
-                    companyList.innerHTML = html;
-                } else if (data.success && data.companies.length === 0) {
-                     companyList.innerHTML = '<div class="status-error">No companies found in the placement table.</div>';
-                } else {
-                    companyList.innerHTML = `<div class="status-error">❌ ${data.error || 'Failed to connect to database for company list.'}</div>`;
-                }
-            });
+            if (companyList) {
+                companyList.innerHTML = '<div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> Loading companies...</div>';
+                
+                fetch('', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'action=get_companies'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.companies.length > 0) {
+                        let html = '';
+                        data.companies.forEach(company => {
+                            const safeCompanyName = company.replace(/'/g, "\\'"); 
+                            html += `<button class="example-btn" onclick="getInterviewPrep('${safeCompanyName}')" style="margin: 5px 0; width: 100%;">${company}</button>`;
+                        });
+                        companyList.innerHTML = html;
+                    } else if (data.success && data.companies.length === 0) {
+                         companyList.innerHTML = '<div class="status-error">No companies found in the placement table.</div>';
+                    } else {
+                        companyList.innerHTML = `<div class="status-error">❌ ${data.error || 'Failed to connect to database for company list.'}</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Load Companies Error:', error);
+                    companyList.innerHTML = '<div class="status-error">❌ Failed to load companies</div>';
+                });
+            }
         }
         
         function getInterviewPrep(companyName) {
             const preparationContent = document.getElementById('preparation-content');
-            preparationContent.innerHTML = 
-                '<div class="ai-thinking">' +
-                    '<span class="ai-dots"><span></span><span></span><span></span></span>' +
-                    'AI is generating personalized preparation guide for ' + companyName +
-                '</div>';
             
-            fetch('', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'action=get_interview_prep&company=' + encodeURIComponent(companyName)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    preparationContent.innerHTML = `
-                        <h3>🎯 AI-Powered Preparation for ${companyName}</h3>
-                        <div style="margin-top: 15px; white-space: pre-wrap; line-height: 1.6; background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid var(--primary);">
-                            ${data.response}
-                        </div>
-                    `;
-                } else {
-                    preparationContent.innerHTML = '<div class="status-error">❌ ' + data.response + '</div>';
-                }
-            });
+            if (preparationContent) {
+                preparationContent.innerHTML = 
+                    '<div class="ai-thinking">' +
+                        '<span class="ai-dots"><span></span><span></span><span></span></span>' +
+                        'AI is generating personalized preparation guide for ' + companyName +
+                    '</div>';
+                
+                fetch('', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'action=get_interview_prep&company=' + encodeURIComponent(companyName)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        preparationContent.innerHTML = `
+                            <h3 style="color: #2c3e50; margin-bottom: 15px;">🎯 AI-Powered Preparation for ${companyName}</h3>
+                            <div style="margin-top: 15px; white-space: pre-wrap; line-height: 1.6; background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #3498db;">
+                                ${data.response}
+                            </div>
+                        `;
+                    } else {
+                        preparationContent.innerHTML = '<div class="status-error">❌ ' + data.response + '</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Interview Prep Error:', error);
+                    preparationContent.innerHTML = '<div class="status-error">❌ Failed to generate preparation guide</div>';
+                });
+            }
         }
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // Test system status on page load
-            testAI(); 
-        });
     </script>
 </body>
 </html>
