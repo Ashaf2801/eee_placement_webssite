@@ -1,0 +1,25 @@
+# Python cache and logs
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Virtual environments
+venv/
+newvenv/
+
+# Flask / Environment
+instance/
+.env
+flask_session/
+*.db
+
+# Test and setup
+tests/
+phpunit.xml
+setup.bat
+
+# System files
+.DS_Store
+Thumbs.db
