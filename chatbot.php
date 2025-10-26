@@ -1,5 +1,4 @@
 <?php
-// chatbot.php - AI-POWERED CHAT INTERFACE
 session_start();
 
 // Check if user is logged in
@@ -8,189 +7,81 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
     exit();
 }
 
-// Get user information
 $currentUserId = $_SESSION['user_id'];
 $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
+$currentUsername = $_SESSION['username'] ?? 'User'; // Get username from session
 
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// CRITICAL FIX STEP 1: Define the current directory
-$script_dir = __DIR__; 
+// Flask API Configuration
+define('FLASK_API_URL', 'http://127.0.0.1:5001');
 
 class AIChatSystem {
-    private $db_config;
-    private $gemini_api_key; 
-    
-    public function __construct() {
-        // --- 1. Database Configuration (XAMPP Default) ---
-        $this->db_config = [
-            'host' => 'localhost',
-            'user' => 'root',
-            'password' => '', 
-            'database' => 'eee_placement',
-            'port' => 3306
+    private function callFlaskAPI($endpoint, $data = [], $method = 'POST') {
+        $url = FLASK_API_URL . $endpoint;
+        $ch = curl_init($url);
+
+        $options = [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 120,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'X-User-ID: ' . $_SESSION['user_id'],
+                'X-User-Type: ' . $_SESSION['user_type']
+            ]
         ];
 
-        // --- 2. Gemini API Key Configuration ---
-        $this->gemini_api_key = 'AIzaSyDqjHK3PUeV8hlYkCr-N4xAQwYw7gmP20Q';
-    }
-    
-    public function getDBConnection() {
-        try {
-            $conn = new mysqli(
-                $this->db_config['host'],
-                $this->db_config['user'], 
-                $this->db_config['password'],
-                $this->db_config['database'],
-                $this->db_config['port']
-            );
-            
-            if ($conn->connect_error) {
-                return ['success' => false, 'message' => "DB Connection failed: " . $conn->connect_error];
-            }
-            return $conn;
-        } catch (Exception $e) {
-            error_log("Database error: " . $e->getMessage());
-            return ['success' => false, 'message' => "Database error: " . $e->getMessage()];
-        }
-    }
-    
-    public function runPythonAI($script_path, $args = []) {
-        $env_prefix = "set GEMINI_API_KEY=" . escapeshellarg($this->gemini_api_key) . " && ";
-        $env_prefix .= "set MYSQL_HOST=" . escapeshellarg($this->db_config['host']) . " && ";
-        $env_prefix .= "set MYSQL_USER=" . escapeshellarg($this->db_config['user']) . " && ";
-        $env_prefix .= "set MYSQL_PASSWORD=" . escapeshellarg($this->db_config['password']) . " && ";
-        $env_prefix .= "set MYSQL_DATABASE=" . escapeshellarg($this->db_config['database']) . " && ";
-
-        $python_executable = 'C:\\xampp\\htdocs\\login-system\\venv\\Scripts\\python.exe'; 
-
-        $full_command = $env_prefix . escapeshellarg($python_executable) . " " . escapeshellarg($script_path); 
-
-        foreach ($args as $arg) {
-            $full_command .= " " . escapeshellarg($arg);
+        if ($method === 'POST') {
+            $options[CURLOPT_POST] = true;
+            $options[CURLOPT_POSTFIELDS] = json_encode($data);
         }
 
-        $full_command .= " 2>&1"; 
+        curl_setopt_array($ch, $options);
 
-        $output_lines = [];
-        $exit_code = 0;
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         
-        exec($full_command, $output_lines, $exit_code);
-        
-        $raw_output = implode("\n", $output_lines);
-
-        $cleaned_lines = [];
-        $start_capturing = false;
-        
-        foreach($output_lines as $line) {
-            if (strpos($line, '🤖 Analyzing results with AI...') !== false) {
-                $start_capturing = true; 
-                continue;
-            }
-            
-            if ($start_capturing) {
-                 if (preg_match('/^(WARNING|E\d{4})/', trim($line))) {
-                     continue; 
-                 }
-                $cleaned_lines[] = $line;
-            }
-        }
-        
-        $final_response = trim(implode("\n", $cleaned_lines));
-        
-        if ($exit_code !== 0 || empty($final_response) || 
-            strpos($final_response, '❌') !== false || 
-            strlen($final_response) < 10) { 
-            
-            error_log("Python AI failed (Exit: $exit_code). Full Output: \n{$raw_output}");
-            
-            if ($exit_code !== 0) {
-                 return "Execution Error: Python script exited with code {$exit_code}. Raw output:\n{$raw_output}";
-            }
-            return false;
-        }
-        
-        return $final_response;
-    }
-    
-    public function handleAIChat($message) {
-        $python_response = $this->runPythonAI('gemini_sql_agent.py', ['query', $message]);
-        
-        if ($python_response && strpos($python_response, 'Execution Error:') === false) {
-            return [
-                'success' => true,
-                'response' => trim($python_response),
-                'type' => 'ai_response'
-            ];
-        } else {
-            $error_message = (strpos($python_response, 'Execution Error:') !== false) ? 
-                             $python_response : 
-                             '🤖 AI service is currently unavailable or returned an empty response. Check server logs.';
+        if (curl_errno($ch)) {
+            $error = curl_error($ch);
+            curl_close($ch);
             return [
                 'success' => false,
-                'response' => $error_message,
-                'type' => 'error'
+                'error' => 'cURL error: ' . $error
             ];
         }
+
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            return [
+                'success' => false,
+                'error' => 'Flask API error: HTTP ' . $httpCode . '. Make sure Flask server is running on port 5000.'
+            ];
+        }
+
+        $decoded = json_decode($response, true);
+        if ($decoded === null) {
+            return [
+                'success' => false,
+                'error' => 'Invalid JSON response from Flask'
+            ];
+        }
+
+        return $decoded;
     }
-    
+
+    public function handleAIChat($message) {
+        return $this->callFlaskAPI('/api/chat', ['message' => $message]);
+    }
+
     public function handleInterviewPrep($company) {
-        $python_response = $this->runPythonAI('gemini_sql_agent.py', ['interview', $company]);
-        
-        if ($python_response && strpos($python_response, 'Execution Error:') === false) {
-            return [
-                'success' => true,
-                'response' => trim($python_response),
-                'type' => 'interview_prep'
-            ];
-        } else {
-            $error_message = (strpos($python_response, 'Execution Error:') !== false) ? 
-                             $python_response : 
-                             "Could not generate preparation guide for $company (AI error).";
-            return [
-                'success' => false, 
-                'response' => $error_message,
-                'type' => 'error'
-            ];
-        }
+        return $this->callFlaskAPI('/api/interview-prep', ['company' => $company]);
     }
-    
+
     public function getCompanies() {
-        $conn_result = $this->getDBConnection();
-        if (is_array($conn_result)) return ['success' => false, 'error' => $conn_result['message']];
-
-        $result = $conn_result->query("SELECT DISTINCT company_name FROM placement ORDER BY company_name");
-        $companies = [];
-        
-        if ($result) {
-            while ($row = $result->fetch_assoc()) {
-                $companies[] = $row['company_name'];
-            }
-        }
-        
-        $conn_result->close();
-        return ['success' => true, 'companies' => $companies];
+        return $this->callFlaskAPI('/api/companies', [], 'GET');
     }
-    
-    public function testAISystem() {
-        $conn_result = $this->getDBConnection();
-        if (is_array($conn_result)) {
-            return ['success' => false, 'db_message' => '❌ DB Error: ' . $conn_result['message'], 'ai_message' => 'Not Tested'];
-        }
-        $conn_result->close();
 
-        $test_response = $this->runPythonAI('gemini_sql_agent.py', ['test', '']);
-        
-        if ($test_response && strlen($test_response) > 10 && strpos($test_response, 'Execution Error:') === false) {
-            return ['success' => true, 'db_message' => '✅ Database connected', 'ai_message' => '✅ AI System working'];
-        } else {
-             $ai_message = (strpos($test_response, 'Execution Error:') !== false) ? 
-                          $test_response : 
-                          '❌ AI System failed. Check terminal/logs for full Python error.';
-            return ['success' => false, 'db_message' => '✅ Database connected', 'ai_message' => $ai_message];
-        }
+    public function testAISystem() {
+        return $this->callFlaskAPI('/api/test', [], 'GET');
     }
 }
 
@@ -198,31 +89,55 @@ class AIChatSystem {
 $aiSystem = new AIChatSystem();
 
 // Handle AJAX requests
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    
-    // CRITICAL FIX STEP 2: Change the directory before running the Python script
-    chdir($script_dir);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && 
+    (strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false || 
+     isset($_SERVER['HTTP_CONTENT_TYPE']) && strpos($_SERVER['HTTP_CONTENT_TYPE'], 'application/json') !== false)) {
     
     header('Content-Type: application/json');
-    
-    switch ($_POST['action']) {
-        case 'send_message':
-            echo json_encode($aiSystem->handleAIChat($_POST['message']));
-            break;
-        case 'get_companies':
-            echo json_encode($aiSystem->getCompanies());
-            break;
-        case 'get_interview_prep':
-            echo json_encode($aiSystem->handleInterviewPrep($_POST['company']));
-            break;
-        case 'test_ai':
-            echo json_encode($aiSystem->testAISystem());
-            break;
-        default:
-            echo json_encode(['success' => false, 'error' => 'Invalid action']);
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    if (isset($input['action'])) {
+        // Old-style action-based routing
+        switch ($input['action']) {
+            case 'send_message':
+                echo json_encode($aiSystem->handleAIChat($input['message']));
+                break;
+            case 'get_interview_prep':
+                echo json_encode($aiSystem->handleInterviewPrep($input['company']));
+                break;
+            default:
+                echo json_encode(['success' => false, 'error' => 'Invalid action']);
+        }
+    } elseif (isset($input['message'])) {
+        // Direct message
+        echo json_encode($aiSystem->handleAIChat($input['message']));
+    } elseif (isset($input['company'])) {
+        // Direct company
+        echo json_encode($aiSystem->handleInterviewPrep($input['company']));
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Invalid POST payload']);
     }
     exit;
 }
+
+// Handle GET requests with query parameters
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
+    header('Content-Type: application/json');
+    
+    switch ($_GET['action']) {
+        case 'companies':
+            echo json_encode($aiSystem->getCompanies());
+            break;
+        case 'test':
+            echo json_encode($aiSystem->testAISystem());
+            break;
+        default:
+            echo json_encode(['success' => false, 'error' => 'Invalid GET action']);
+    }
+    exit;
+}
+
+// If not an AJAX/API call, render the HTML frontend
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -245,7 +160,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             line-height: 1.6;
         }
         
-        /* Navbar Styles - Matching dashboard.php */
         .navbar {
             background-color: #2c3e50;
             color: white;
@@ -274,28 +188,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             font-weight: bold;
         }
         
-        .nav-links {
-            display: flex;
-            gap: 20px;
-        }
-        
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            padding: 8px 12px;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-        
-        .nav-links a:hover {
-            background-color: #34495e;
-        }
-        
         .user-info {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
         }
         
         .user-info img {
@@ -305,106 +201,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             object-fit: cover;
         }
         
-        /* Mobile Menu Button */
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 5px;
-        }
-        
-        /* Mobile Menu Overlay */
-        .mobile-menu {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-        
-        .mobile-menu-content {
-            position: fixed;
-            top: 0;
-            right: -300px;
-            width: 300px;
-            height: 100%;
-            background: #2c3e50;
-            transition: right 0.3s ease;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        
-        .mobile-menu.active {
-            display: block;
-        }
-        
-        .mobile-menu.active .mobile-menu-content {
-            right: 0;
-        }
-        
-        .mobile-menu-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #34495e;
-        }
-        
-        .mobile-menu-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        
-        .mobile-nav-links {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .mobile-nav-links a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            padding: 12px 15px;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .mobile-nav-links a:hover {
-            background-color: #34495e;
-        }
-        
-        .mobile-user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background: #34495e;
-            border-radius: 8px;
-        }
-        
-        .mobile-user-info img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        
-        /* Container */
         .container {
             max-width: 1400px;
             margin: 30px auto;
@@ -422,11 +218,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             margin-bottom: 10px;
         }
         
-        .page-header p {
-            color: #7f8c8d;
-            font-size: 18px;
-        }
-        
         .ai-badge {
             background: #27ae60;
             color: white;
@@ -437,7 +228,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             margin-top: 10px;
         }
         
-        /* Main Content */
         .app-container {
             display: grid;
             grid-template-columns: 320px 1fr;
@@ -513,9 +303,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             border: 2px solid #ecf0f1;
             border-bottom-left-radius: 5px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        
-        .message.assistant.ai-response {
             border-left: 4px solid #3498db;
         }
         
@@ -664,7 +451,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         .status-success { color: #27ae60; font-weight: bold; }
         .status-error { color: #e74c3c; font-weight: bold; }
         
-        /* Footer */
+        .btn-logout {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: #c0392b;
+        }
+        
         footer {
             background-color: #2c3e50;
             color: white;
@@ -673,7 +472,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             margin-top: 40px;
         }
         
-        /* Responsive Design */
         @media (max-width: 1024px) {
             .app-container {
                 grid-template-columns: 1fr;
@@ -689,59 +487,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
         
         @media (max-width: 768px) {
-            .navbar {
-                padding: 15px 20px;
-            }
-            
-            .nav-links {
-                display: none;
-            }
-            
-            .user-info {
-                display: none;
-            }
-            
-            .mobile-menu-btn {
-                display: block;
-            }
-            
-            .container {
-                padding: 0 15px;
-                margin: 20px auto;
-            }
-            
-            .page-header h1 {
-                font-size: 24px;
-            }
-            
-            .page-header p {
-                font-size: 16px;
-            }
-            
             .chat-messages {
                 max-height: 400px;
             }
             
             .message {
                 max-width: 90%;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .navbar {
-                padding: 12px 15px;
-            }
-            
-            .logo {
-                height: 40px;
-            }
-            
-            .nav-title {
-                font-size: 18px;
-            }
-            
-            .mobile-menu-content {
-                width: 280px;
             }
             
             .chat-input {
@@ -755,66 +506,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     </style>
 </head>
 <body>
-    <!-- Navbar - Matching dashboard.php -->
     <nav class="navbar">
         <div class="logo-container">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Itechlogo.png/738px-Itechlogo.png" alt="PSG iTech Logo" class="logo">
             <span class="nav-title">EEE Department</span>
         </div>
-        <div class="nav-links">
-            <a href="placement_experience.php"><i class="fas fa-book"></i> PLACED EXPERIENCE</a>
-            <a href="dashboard.php"><i class="fas fa-pencil-alt"></i> PREP TOPICS</a>
-            <?php if (in_array($currentUserType, ['admin', 'faculty'])): ?>
-                <a href="admin_panel.php"><i class="fas fa-user-shield"></i> Admin Panel</a>
-            <?php endif; ?>
-            <a href="logout.php" style="background: #e74c3c;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
-        </div>
         <div class="user-info">
             <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
-            <span><?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?></span>
-            <small style="font-size: 11px; opacity: 0.8;">(<?php echo ucfirst($currentUserType); ?>)</small>
+            <span><?php echo htmlspecialchars($currentUsername); ?></span>
+            <small style="font-size: 11px; opacity: 0.8;">(<?php echo htmlspecialchars($currentUserType); ?>)</small>
+            <a href="logout.php" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
-        <button class="mobile-menu-btn" id="mobileMenuBtn">
-            <i class="fas fa-bars"></i>
-        </button>
     </nav>
 
-    <!-- Mobile Menu -->
-    <div class="mobile-menu" id="mobileMenu">
-        <div class="mobile-menu-content">
-            <div class="mobile-menu-header">
-                <h3>Menu</h3>
-                <button class="mobile-menu-close" id="mobileMenuClose">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="mobile-nav-links">
-                <a href="placement_experience.php"><i class="fas fa-book"></i> PLACED EXPERIENCE</a>
-                <a href="dashboard.php"><i class="fas fa-pencil-alt"></i> PREP TOPICS</a>
-                <?php if (in_array($currentUserType, ['admin', 'faculty'])): ?>
-                    <a href="admin_panel.php"><i class="fas fa-user-shield"></i> Admin Panel</a>
-                <?php endif; ?>
-                <a href="logout.php" style="background: #e74c3c;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
-            </div>
-            <div class="mobile-user-info">
-                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
-                <div>
-                    <div style="font-weight: bold;"><?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?></div>
-                    <div style="font-size: 14px; color: #bdc3c7;"><?php echo ucfirst($currentUserType); ?></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content -->
     <div class="container">
         <div class="page-header">
             <h1>🎓 EEE Placement AI Assistant</h1>
+            <span class="ai-badge">Powered by Gemini AI</span>
         </div>
         
         <div class="app-container">
             <div class="sidebar">
-                <h3>🚀 AI Quick Questions</h3>
+                <h3>🚀 Quick Questions</h3>
                 <div class="examples-grid">
                     <button class="example-btn" onclick="sendExample('Which students got the highest packages and why?')">
                         🏆 Top Packages Analysis
@@ -838,10 +551,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 
                 <div class="system-status">
                     <h4>🔧 System Status</h4>
-                    <div id="db-status" class="status-error">Checking database...</div>
-                    <div id="ai-status" class="status-error" style="margin-top: 10px;">Checking AI...</div>
-                    <button onclick="testAI()" style="margin-top: 10px; width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                        Test AI System
+                    <div id="db-status" class="status-error">Checking...</div>
+                    <div id="ai-status" class="status-error" style="margin-top: 10px;">Checking...</div>
+                    <button onclick="testSystem()" style="margin-top: 10px; width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                        Test System
                     </button>
                 </div>
             </div>
@@ -855,22 +568,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 <div id="chat-tab" class="tab-content active">
                     <div class="chat-container">
                         <div class="chat-messages" id="chat-messages">
-                            <div class="message assistant ai-response">
-                                <strong>🤖 AI Assistant:</strong> Welcome! I'm your AI-powered placement assistant. I can analyze placement data, provide study guidance, interview preparation, and insights. What would you like to know?
+                            <div class="message assistant">
+                                <strong>🤖 AI Assistant:</strong> Welcome! I'm your AI-powered placement assistant. I can analyze placement data, provide study guidance, and interview preparation. What would you like to know?
                             </div>
                         </div>
                         
                         <div class="chat-input">
-                            <input type="text" id="message-input" placeholder="Ask anything about placements, preparation, or analysis..." onkeypress="handleKeyPress(event)">
-                            <button onclick="sendMessage()">
-                                Send 
-                                <span class="ai-thinking" style="display: none;" id="send-thinking">
-                                    <span class="ai-dots">
-                                        <span></span>
-                                        <span></span>
-                                        <span></span>
-                                    </span>
-                                </span>
+                            <input type="text" id="message-input" placeholder="Ask anything about placements..." onkeypress="handleKeyPress(event)">
+                            <button onclick="sendMessage()" id="send-btn">
+                                Send
                             </button>
                         </div>
                     </div>
@@ -878,20 +584,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 
                 <div id="interview-tab" class="tab-content">
                     <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; flex: 1;">
-                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; display: flex; flex-direction: column; border: 1px solid #ecf0f1;">
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #ecf0f1;">
                             <h4 style="color: #2c3e50; margin-bottom: 15px;">🏢 Select Company</h4>
-                            <div id="company-list" style="margin-top: 15px; overflow-y: auto; flex: 1;">
+                            <div id="company-list" style="margin-top: 15px; overflow-y: auto; max-height: 500px;">
                                 <div class="ai-thinking">
                                     <span class="ai-dots"><span></span><span></span><span></span></span>
-                                    Loading companies...
+                                    Loading...
                                 </div>
                             </div>
                         </div>
                         
                         <div style="background: white; padding: 20px; border-radius: 8px; border: 2px solid #ecf0f1; overflow-y: auto;">
-                            <h4 style="color: #2c3e50; margin-bottom: 15px;">🎯 AI-Powered Interview Preparation</h4>
+                            <h4 style="color: #2c3e50; margin-bottom: 15px;">🎯 Interview Preparation</h4>
                             <div id="preparation-content">
-                                <p style="color: #7f8c8d;">Select a company from the list to get a detailed, AI-generated personalized interview preparation guide based on available placement data.</p>
+                                <p style="color: #7f8c8d;">Select a company to get AI-generated interview preparation guide.</p>
                             </div>
                         </div>
                     </div>
@@ -901,45 +607,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     </div>
 
     <footer>
-        <p>Department of EEE - PSG iTech © 2025. All rights reserved.</p>
+        <p>Department of EEE - PSG iTech © 2025</p>
     </footer>
 
     <script>
-        // Mobile menu functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const mobileMenu = document.getElementById('mobileMenu');
-            const mobileMenuClose = document.getElementById('mobileMenuClose');
-
-            if (mobileMenuBtn) {
-                mobileMenuBtn.addEventListener('click', function() {
-                    mobileMenu.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                });
-            }
-
-            if (mobileMenuClose) {
-                mobileMenuClose.addEventListener('click', function() {
-                    mobileMenu.classList.remove('active');
-                    document.body.style.overflow = '';
-                });
-            }
-
-            // Close menu when clicking overlay
-            if (mobileMenu) {
-                mobileMenu.addEventListener('click', function(e) {
-                    if (e.target === mobileMenu) {
-                        mobileMenu.classList.remove('active');
-                        document.body.style.overflow = '';
-                    }
-                });
-            }
-
-            // Test system status on page load
-            testAI();
-        });
-
-        // AI Chat System JavaScript
         let currentTab = 'chat';
         
         function switchTab(tabName, event) {
@@ -957,60 +628,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         function sendMessage() {
             const input = document.getElementById('message-input');
             const message = input.value.trim();
-            const sendBtn = document.querySelector('.chat-input button');
-            const thinkingIndicator = document.getElementById('send-thinking');
+            const sendBtn = document.getElementById('send-btn');
             
-            if (message) {
-                addMessage(message, 'user');
-                input.value = '';
+            if (!message) return;
+            
+            addMessage(message, 'user');
+            input.value = '';
+            
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span></span>';
+            
+            const thinkingId = addMessage(
+                '<div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> AI is analyzing...</div>', 
+                'assistant', 
+                true
+            );
+            
+            // FIXED: Call chatbot.php instead of /api/chat
+            fetch('chatbot.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message: message})
+            })
+            .then(response => response.json())
+            .then(data => {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = 'Send';
                 
-                // Show AI thinking
-                sendBtn.disabled = true;
-                thinkingIndicator.style.display = 'inline-flex';
+                const thinkingElem = document.getElementById(thinkingId);
+                if (thinkingElem) thinkingElem.remove();
                 
-                const thinkingId = addMessage(
-                    '<div class="ai-thinking">' +
-                        '<span class="ai-dots"><span></span><span></span><span></span></span>' +
-                        'AI is analyzing your question...' +
-                    '</div>', 
-                    'assistant', 
-                    true
-                );
+                if (data.success) {
+                    addMessage(data.response, 'assistant');
+                } else {
+                    addMessage('❌ ' + (data.error || 'An error occurred'), 'assistant');
+                }
+            })
+            .catch(error => {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = 'Send';
                 
-                // Send to AI
-                fetch('', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: 'action=send_message&message=' + encodeURIComponent(message)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    sendBtn.disabled = false;
-                    thinkingIndicator.style.display = 'none';
-                    
-                    const thinkingElem = document.getElementById(thinkingId);
-                    if (thinkingElem) thinkingElem.remove();
-                    
-                    if (data.success) {
-                        addMessage(data.response, 'assistant', false, 'ai-response');
-                    } else {
-                        addMessage('❌ ' + data.response, 'assistant', false, 'error-response');
-                        
-                        if (data.response.includes("Execution Error")) {
-                           addMessage('<pre style="color:red; background:#ffeeee; padding: 10px; border-radius: 5px;">' + data.response + '</pre>', 'assistant', false, 'error-response');
-                        }
-                    }
-                })
-                .catch(error => {
-                    sendBtn.disabled = false;
-                    thinkingIndicator.style.display = 'none';
-                    
-                    const thinkingElem = document.getElementById(thinkingId);
-                    if (thinkingElem) thinkingElem.remove();
-                    
-                    addMessage('❌ Network or Server error. AI service unavailable.', 'assistant', false, 'error-response');
-                });
-            }
+                const thinkingElem = document.getElementById(thinkingId);
+                if (thinkingElem) thinkingElem.remove();
+                
+                addMessage('❌ Network error: ' + error.message, 'assistant');
+            });
         }
         
         function sendExample(message) {
@@ -1018,12 +680,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             sendMessage();
         }
         
-        function addMessage(content, role, isTemp = false, extraClass = '') {
+        function addMessage(content, role, isTemp = false) {
             const messagesContainer = document.getElementById('chat-messages');
             const messageId = 'msg-' + Date.now();
             
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${role} ${extraClass}`;
+            messageDiv.className = `message ${role}`;
             messageDiv.id = isTemp ? messageId : '';
             
             const prefix = role === 'user' ? '👤 You:' : '🤖 AI:';
@@ -1039,117 +701,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             if (event.key === 'Enter') sendMessage();
         }
         
-        function testAI() {
+        function testSystem() {
             const dbStatus = document.getElementById('db-status');
             const aiStatus = document.getElementById('ai-status');
             
-            if (dbStatus) dbStatus.innerHTML = '<div class="ai-thinking">Testing Database...</div>';
-            if (aiStatus) aiStatus.innerHTML = '<div class="ai-thinking">Testing AI System...</div>';
+            dbStatus.innerHTML = '<div class="ai-thinking">Testing...</div>';
+            aiStatus.innerHTML = '<div class="ai-thinking">Testing...</div>';
             
-            fetch('', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'action=test_ai'
-            })
+            // FIXED: Call chatbot.php?action=test
+            fetch('chatbot.php?action=test')
             .then(response => response.json())
             .then(data => {
-                if (dbStatus) {
-                    dbStatus.innerHTML = data.db_message;
-                    dbStatus.className = data.db_message.startsWith('✅') ? 'status-success' : 'status-error';
-                }
-
-                if (aiStatus) {
-                    aiStatus.innerHTML = data.ai_message;
-                    aiStatus.className = data.ai_message.startsWith('✅') ? 'status-success' : 'status-error';
-                }
+                dbStatus.innerHTML = data.db_status || '❌ No status';
+                dbStatus.className = (data.db_status && data.db_status.startsWith('✅')) ? 'status-success' : 'status-error';
                 
-                if (data.ai_message.includes("Execution Error")) {
-                    const chatMessages = document.getElementById('chat-messages');
-                    if (chatMessages) {
-                        chatMessages.innerHTML += `<div class="message assistant error-response"><strong>🤖 AI:</strong> <pre style="color:red; background:#ffeeee; padding: 10px; border-radius: 5px;">${data.ai_message}</pre></div>`;
-                    }
-                }
+                aiStatus.innerHTML = data.ai_status || '❌ No status';
+                aiStatus.className = (data.ai_status && data.ai_status.startsWith('✅')) ? 'status-success' : 'status-error';
             })
             .catch(error => {
-                console.error('Test AI Error:', error);
-                if (dbStatus) {
-                    dbStatus.innerHTML = '❌ Connection failed';
-                    dbStatus.className = 'status-error';
-                }
-                if (aiStatus) {
-                    aiStatus.innerHTML = '❌ Test failed';
-                    aiStatus.className = 'status-error';
-                }
+                dbStatus.innerHTML = '❌ Test failed: ' + error.message;
+                dbStatus.className = 'status-error';
+                aiStatus.innerHTML = '❌ Test failed';
+                aiStatus.className = 'status-error';
             });
         }
         
         function loadCompanies() {
             const companyList = document.getElementById('company-list');
+            companyList.innerHTML = '<div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> Loading...</div>';
             
-            if (companyList) {
-                companyList.innerHTML = '<div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> Loading companies...</div>';
-                
-                fetch('', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: 'action=get_companies'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.companies.length > 0) {
-                        let html = '';
-                        data.companies.forEach(company => {
-                            const safeCompanyName = company.replace(/'/g, "\\'"); 
-                            html += `<button class="example-btn" onclick="getInterviewPrep('${safeCompanyName}')" style="margin: 5px 0; width: 100%;">${company}</button>`;
-                        });
-                        companyList.innerHTML = html;
-                    } else if (data.success && data.companies.length === 0) {
-                         companyList.innerHTML = '<div class="status-error">No companies found in the placement table.</div>';
-                    } else {
-                        companyList.innerHTML = `<div class="status-error">❌ ${data.error || 'Failed to connect to database for company list.'}</div>`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Load Companies Error:', error);
-                    companyList.innerHTML = '<div class="status-error">❌ Failed to load companies</div>';
-                });
-            }
+            // FIXED: Call chatbot.php?action=companies
+            fetch('chatbot.php?action=companies')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.companies && data.companies.length > 0) {
+                    let html = '';
+                    data.companies.forEach(company => {
+                        html += `<button class="example-btn" onclick="getInterviewPrep('${company.replace(/'/g, "\\'")}')" style="margin: 5px 0; width: 100%;">${company}</button>`;
+                    });
+                    companyList.innerHTML = html;
+                } else {
+                    companyList.innerHTML = '<div class="status-error">No companies found' + (data.error ? ': ' + data.error : '') + '</div>';
+                }
+            })
+            .catch(error => {
+                companyList.innerHTML = '<div class="status-error">❌ Failed to load: ' + error.message + '</div>';
+            });
         }
         
         function getInterviewPrep(companyName) {
             const preparationContent = document.getElementById('preparation-content');
             
-            if (preparationContent) {
-                preparationContent.innerHTML = 
-                    '<div class="ai-thinking">' +
-                        '<span class="ai-dots"><span></span><span></span><span></span></span>' +
-                        'AI is generating personalized preparation guide for ' + companyName +
-                    '</div>';
-                
-                fetch('', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: 'action=get_interview_prep&company=' + encodeURIComponent(companyName)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        preparationContent.innerHTML = `
-                            <h3 style="color: #2c3e50; margin-bottom: 15px;">🎯 AI-Powered Preparation for ${companyName}</h3>
-                            <div style="margin-top: 15px; white-space: pre-wrap; line-height: 1.6; background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #3498db;">
-                                ${data.response}
-                            </div>
-                        `;
-                    } else {
-                        preparationContent.innerHTML = '<div class="status-error">❌ ' + data.response + '</div>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Interview Prep Error:', error);
-                    preparationContent.innerHTML = '<div class="status-error">❌ Failed to generate preparation guide</div>';
-                });
-            }
+            preparationContent.innerHTML = '<div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> Generating guide for ' + companyName + '</div>';
+            
+            // FIXED: Call chatbot.php
+            fetch('chatbot.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({company: companyName})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    preparationContent.innerHTML = `
+                        <h3 style="color: #2c3e50; margin-bottom: 15px;">🎯 Preparation for ${companyName}</h3>
+                        <div style="white-space: pre-wrap; line-height: 1.6; background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                            ${data.response}
+                        </div>
+                    `;
+                } else {
+                    preparationContent.innerHTML = '<div class="status-error">❌ ' + (data.error || 'Failed to generate guide') + '</div>';
+                }
+            })
+            .catch(error => {
+                preparationContent.innerHTML = '<div class="status-error">❌ Network error: ' + error.message + '</div>';
+            });
         }
+        
+        // Test system on load
+        document.addEventListener('DOMContentLoaded', function() {
+            testSystem();
+        });
     </script>
 </body>
 </html>

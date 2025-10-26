@@ -591,7 +591,7 @@ $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
         </div>
         <div class="nav-links">
             <a href="placement_experience.php"><i class="fas fa-book"></i> PLACED EXPERIENCE</a>
-            <a href="#"><i class="fas fa-pencil-alt"></i> PREP WITH AI</a>
+            <a href="chatbot.php"><i class="fas fa-pencil-alt"></i> PREP WITH AI</a>
             <?php if (in_array($currentUserType, ['admin', 'faculty'])): ?>
                 <a href="admin_panel.php"><i class="fas fa-user-shield"></i> Admin Panel</a>
             <?php endif; ?>
@@ -618,7 +618,7 @@ $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
             </div>
             <div class="mobile-nav-links">
                 <a href="placement_experience.php"><i class="fas fa-book"></i> PLACED EXPERIENCE</a>
-                <a href="#"><i class="fas fa-pencil-alt"></i> PREP WITH AI</a>
+                <a href="chatbot.php"><i class="fas fa-pencil-alt"></i> PREP WITH AI</a>
                 <a href="logout.php" style="background: #e74c3c;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
             </div>
             <div class="mobile-user-info">
