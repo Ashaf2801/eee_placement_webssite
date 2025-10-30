@@ -7,11 +7,12 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
     exit();
 }
 
-// Get user information
-$currentUserId = $_SESSION['user_id'];
-$currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
+$currentUserMail = $_SESSION['mail_id'];
+$currentUserType = $_SESSION['user_type'];
+$username = $_SESSION['user_name'] ?? 'User';
+$firstLetter = strtoupper(substr($username, 0, 1));
 
-// Determine if user can edit (only admin and faculty)
+$currentYear = date('Y');
 $canEdit = in_array($currentUserType, ['admin', 'faculty']);
 ?>
 <!DOCTYPE html>
@@ -28,14 +29,13 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
             background-color: #f5f7fa;
             color: #333;
             line-height: 1.6;
         }
-        
-        /* Navbar Styles */
+
         .navbar {
             background-color: #2c3e50;
             color: white;
@@ -48,54 +48,82 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             top: 0;
             z-index: 100;
         }
-        
+
         .logo-container {
             display: flex;
             align-items: center;
         }
-        
+
         .logo {
             height: 50px;
             margin-right: 15px;
         }
-        
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
         .nav-title {
             font-size: 22px;
             font-weight: bold;
         }
-        
+
         .nav-links {
             display: flex;
-            gap: 20px;
+            gap: 15px;
         }
-        
+
         .nav-links a {
             color: white;
             text-decoration: none;
             font-weight: 500;
-            padding: 8px 12px;
-            border-radius: 4px;
-            transition: background-color 0.3s;
+            padding: 10px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
         }
-        
-        .nav-links a:hover {
+
+        .nav-links a:hover,
+        .nav-links a:focus {
             background-color: #34495e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            outline: none;
         }
-        
+
         .user-info {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            padding: 8px 16px;
+            background: #2c3e50;
+            border-radius: 8px;
         }
-        
-        .user-info img {
-            width: 40px;
-            height: 40px;
+
+        .user-avatar {
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
-            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
-        
-        /* Mobile Menu Button */
+
+        .user-info span {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
         .mobile-menu-btn {
             display: none;
             background: none;
@@ -103,16 +131,120 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             color: white;
             font-size: 20px;
             cursor: pointer;
-            padding: 5px;
+            padding: 8px;
+            border-radius: 4px;
         }
-        
-        /* Container */
+
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+
+        .mobile-menu-content {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100%;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .mobile-menu.active {
+            display: block;
+        }
+
+        .mobile-menu.active .mobile-menu-content {
+            right: 0;
+        }
+
+        .mobile-nav-links a:hover::before {
+            left: 100%;
+        }
+
+        .mobile-nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(8px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .mobile-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-menu-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mobile-logout-link:hover::before {
+            left: 100%;
+        }
+
+        .mobile-logout-link:hover {
+            background: linear-gradient(135deg, #006effff 0%, #0055ccff 100%) !important;
+            transform: translateX(8px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 20px 25px;
+        }
+
+        .mobile-nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 16px 20px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-user-info {
+            margin: 20px 25px;
+        }
+
+        .mobile-logout-link {
+            background: linear-gradient(135deg, #0080ffff 0%, #006effff 100%) !important;
+            margin-top: 10px;
+        }
+
         .container {
             max-width: 1200px;
             margin: 30px auto;
             padding: 0 20px;
         }
-        
+
         .page-header {
             background: white;
             padding: 30px;
@@ -121,19 +253,13 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             margin-bottom: 30px;
             text-align: center;
         }
-        
+
         .page-header h1 {
             color: #2c3e50;
             font-size: 32px;
             margin-bottom: 10px;
         }
-        
-        .page-header p {
-            color: #7f8c8d;
-            font-size: 18px;
-        }
-        
-        /* Batch Selection */
+
         .batch-container {
             background: white;
             padding: 25px;
@@ -141,14 +267,14 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
         }
-        
+
         .batch-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
-        
+
         .batch-card {
             background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
@@ -161,13 +287,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             font-size: 18px;
             font-weight: 600;
         }
-        
-        .batch-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
-        }
-        
-        /* Company Table */
+
         .company-table-container {
             background: white;
             border-radius: 8px;
@@ -176,11 +296,11 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             display: none;
             margin-bottom: 30px;
         }
-        
+
         .company-table-container.active {
             display: block;
         }
-        
+
         .table-header {
             background: #34495e;
             color: white;
@@ -189,7 +309,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .back-btn {
             background: #3498db;
             color: white;
@@ -199,44 +319,34 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             cursor: pointer;
             font-size: 14px;
         }
-        
-        .back-btn:hover {
-            background: #2980b9;
-        }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
-        
+
         th, td {
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #ecf0f1;
         }
-        
+
         th {
             background: #f8f9fa;
             font-weight: 600;
             color: #2c3e50;
         }
-        
+
         tr:hover {
             background: #f8f9fa;
         }
-        
+
         .company-name {
             color: #3498db;
             cursor: pointer;
             font-weight: 600;
         }
-        
-        .company-name:hover {
-            color: #2980b9;
-            text-decoration: underline;
-        }
-        
-        /* Student Table */
+
         .student-table-container {
             background: white;
             border-radius: 8px;
@@ -245,27 +355,85 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             display: none;
             margin-bottom: 30px;
         }
-        
+
         .student-table-container.active {
             display: block;
         }
-        
+
         .experience-link {
             background: #e74c3c;
             color: white;
             padding: 6px 12px;
             border-radius: 4px;
-            text-decoration: none;
             font-size: 12px;
             cursor: pointer;
             border: none;
         }
-        
-        .experience-link:hover {
-            background: #c0392b;
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            margin-left: 5px;
         }
-        
-        /* Modal */
+
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .confirm-modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .confirm-modal-content h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .confirm-modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .confirm-btn-cancel,
+        .confirm-btn-delete {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .confirm-btn-cancel {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .confirm-btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -276,7 +444,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
         }
-        
+
         .modal-content {
             background-color: white;
             margin: 5% auto;
@@ -288,7 +456,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             overflow-y: auto;
             position: relative;
         }
-        
+
         .modal-close {
             position: absolute;
             right: 20px;
@@ -298,26 +466,18 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             cursor: pointer;
             color: #aaa;
         }
-        
-        .modal-close:hover {
-            color: #000;
-        }
-        
+
         .modal-header {
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 2px solid #ecf0f1;
         }
-        
+
         .modal-header h2 {
             color: #2c3e50;
             margin-bottom: 5px;
         }
-        
-        .modal-header p {
-            color: #7f8c8d;
-        }
-        
+
         .round-section {
             margin-bottom: 25px;
             padding: 20px;
@@ -325,7 +485,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             border-radius: 6px;
             background: #f8f9fa;
         }
-        
+
         .round-title {
             color: #2c3e50;
             font-size: 18px;
@@ -335,67 +495,13 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             align-items: center;
             gap: 10px;
         }
-        
+
         .round-content {
             color: #34495e;
             line-height: 1.6;
             white-space: pre-wrap;
         }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .navbar {
-                padding: 15px 20px;
-            }
-            
-            .nav-links {
-                display: none;
-            }
-            
-            .user-info {
-                display: none;
-            }
-            
-            .mobile-menu-btn {
-                display: block;
-            }
-            
-            .container {
-                padding: 0 15px;
-            }
-            
-            .modal-content {
-                width: 95%;
-                margin: 2% auto;
-                padding: 20px;
-            }
-            
-            .batch-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            table {
-                font-size: 14px;
-            }
-            
-            th, td {
-                padding: 8px 10px;
-            }
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #7f8c8d;
-        }
-        
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #7f8c8d;
-        }
 
-        /* Add Experience Button */
         .add-experience-container {
             text-align: center;
             margin-bottom: 30px;
@@ -410,16 +516,9 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             font-weight: 600;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
         }
 
-        .add-experience-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
-        }
-
-        /* Add Experience Modal */
         .add-experience-modal {
             display: none;
             position: fixed;
@@ -454,10 +553,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             color: #aaa;
         }
 
-        .add-experience-modal-close:hover {
-            color: #000;
-        }
-
         .form-header {
             margin-bottom: 30px;
             padding-bottom: 15px;
@@ -467,10 +562,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
         .form-header h2 {
             color: #2c3e50;
             margin-bottom: 5px;
-        }
-
-        .form-header p {
-            color: #7f8c8d;
         }
 
         .form-row {
@@ -483,10 +574,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
         .form-group {
             display: flex;
             flex-direction: column;
-        }
-
-        .form-group.full-width {
-            grid-column: 1 / -1;
         }
 
         .form-group label {
@@ -502,25 +589,12 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             border: 2px solid #ecf0f1;
             border-radius: 6px;
             font-size: 14px;
-            transition: border-color 0.3s ease;
             font-family: inherit;
-        }
-
-        .form-group input:focus, 
-        .form-group select:focus, 
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
 
         .form-group textarea {
             resize: vertical;
-            min-height: 120px;
-        }
-
-        .company-select-group {
-            position: relative;
+            min-height: 150px;
         }
 
         .add-company-option {
@@ -532,10 +606,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             font-size: 12px;
             cursor: pointer;
             margin-top: 5px;
-        }
-
-        .add-company-option:hover {
-            background: #c0392b;
         }
 
         .new-company-input {
@@ -551,6 +621,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             font-size: 12px;
             margin-top: 5px;
             text-align: right;
+            color: #7f8c8d;
         }
 
         .char-count.warning {
@@ -584,10 +655,9 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 12px 20px;      /* Add padding for a bigger box */
-            background: #f4f6fa;     /* Optional: subtle background */
-            border-radius: 8px;      /* Optional: rounded corners */
-            box-sizing: border-box;  /* Ensure padding is included in size */
+            padding: 12px 20px;
+            background: #f4f6fa;
+            border-radius: 8px;
         }
 
         .form-actions {
@@ -606,7 +676,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
 
         .btn-cancel {
@@ -614,25 +683,11 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             color: white;
         }
 
-        .btn-cancel:hover {
-            background: #7f8c8d;
-        }
-
         .btn-submit {
             background: #27ae60;
             color: white;
         }
 
-        .btn-submit:hover {
-            background: #229954;
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        /* Success/Error Messages */
         .message {
             padding: 15px;
             border-radius: 6px;
@@ -656,7 +711,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             display: block;
         }
 
-        /* Edit Mode Styles */
         .edit-mode-header {
             background: #f39c12;
             color: white;
@@ -666,52 +720,114 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             text-align: center;
         }
 
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        @media (max-width: 1200px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .user-info {
+                display: none;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+
         @media (max-width: 768px) {
-            .form-row {
+            .navbar {
+                padding: 15px 20px;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+            
+            .batch-grid {
                 grid-template-columns: 1fr;
             }
             
-            .add-experience-modal-content {
-                width: 95%;
-                padding: 20px;
-            }
-            
-            .form-actions {
-                flex-direction: column;
+            .form-row {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar">
         <div class="logo-container">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Itechlogo.png/738px-Itechlogo.png" alt="PSG iTech Logo" class="logo">
             <span class="nav-title">EEE Department</span>
         </div>
-        <div class="nav-links">
-
-            <a href="dashboard.php"><i class="fas fa-home"></i> DASHBOARD</a>
-            <a href="chatbot.html"><i class="fas fa-pencil"></i> PREP WITH AI</a>
+        
+        <div class="nav-content">
+            <div class="nav-links">
+                <a href="dashboard.php"><i class="fas fa-home"></i> HOME</a>
+                <a href="placement_experience.php" style="background: #34495e;"><i class="fas fa-book"></i> PLACED EXPERIENCE</a>
+                <a href="chatbot.php"><i class="fas fa-pencil-alt"></i> PREP WITH AI</a>
+                <?php if (in_array($currentUserType, ['admin', 'faculty'])): ?>
+                    <a href="admin_panel.php"><i class="fas fa-user-shield"></i> Admin Panel</a>
+                <?php endif; ?>
+                <a href="logout.php" style="background: #009dffff;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar"><?php echo $firstLetter; ?></div>
+                <span><?php echo htmlspecialchars($username); ?></span>
+                <small style="font-size: 11px; opacity: 0.8;">(<?php echo ucfirst($currentUserType); ?>)</small>
+            </div>
         </div>
-        <div class="user-info">
-            <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
-            <small style="font-size: 11px; opacity: 0.8;">(<?php echo ucfirst($currentUserType); ?>)</small>
-        </div>
+        
         <button class="mobile-menu-btn" id="mobileMenuBtn">
             <i class="fas fa-bars"></i>
         </button>
     </nav>
 
-    <!-- Main Content -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-content">
+            <div class="mobile-menu-header">
+                <div class="mobile-user-info">
+                    <div>
+                        <div style="font-weight: 700; font-size: 16px; color: white;"><?php echo htmlspecialchars($username); ?>
+                            <div style="font-size: 13px; color: #bdc3c7; background: rgba(255, 255, 255, 0.1); padding: 1px 10px; border-radius: 20px; display: inline-block;"><?php echo ucfirst($currentUserType); ?></div>
+                        </div>
+                    </div>
+                </div>
+                <button class="mobile-menu-close" id="mobileMenuClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href="dashboard.php"><i class="fas fa-home"></i><span>HOME</span></a>
+                <a href="placement_experience.php"><i class="fas fa-book"></i><span>PLACED EXPERIENCE</span></a>
+                <a href="chatbot.php"><i class="fas fa-pencil-alt"></i><span>PREP WITH AI</span></a>
+                <?php if (in_array($currentUserType, ['admin', 'faculty'])): ?>
+                    <a href="admin_panel.php"><i class="fas fa-user-shield"></i><span>Admin Panel</span></a>
+                <?php endif; ?>
+                <a href="logout.php" class="mobile-logout-link"><i class="fas fa-sign-out-alt"></i><span>LOGOUT</span></a>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
-        <!-- Page Header -->
         <div class="page-header">
             <h1><i class="fas fa-trophy"></i> Placement Experience</h1>
             <p>Explore placement experiences of our students across different batches</p>
         </div>
 
-        <!-- Add Experience Button -->
         <?php if ($canEdit): ?>
         <div class="add-experience-container">
             <button class="add-experience-btn" onclick="openAddExperienceModal()">
@@ -720,15 +836,11 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
         </div>
         <?php endif; ?>
 
-        <!-- Batch Selection -->
         <div class="batch-container" id="batchContainer">
             <h2><i class="fas fa-graduation-cap"></i> Select Graduation Year</h2>
-            <div class="batch-grid" id="batchGrid">
-                <!-- Batches will be loaded here -->
-            </div>
+            <div class="batch-grid" id="batchGrid"></div>
         </div>
 
-        <!-- Company Table -->
         <div class="company-table-container" id="companyTableContainer">
             <div class="table-header">
                 <h2 id="companyTableTitle">Companies - Batch 2024</h2>
@@ -736,12 +848,9 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                     <i class="fas fa-arrow-left"></i> Back to Batches
                 </button>
             </div>
-            <div id="companyTableContent">
-                <!-- Company table will be loaded here -->
-            </div>
+            <div id="companyTableContent"></div>
         </div>
 
-        <!-- Student Table -->
         <div class="student-table-container" id="studentTableContainer">
             <div class="table-header">
                 <h2 id="studentTableTitle">Students - Company Name</h2>
@@ -749,13 +858,10 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                     <i class="fas fa-arrow-left"></i> Back to Companies
                 </button>
             </div>
-            <div id="studentTableContent">
-                <!-- Student table will be loaded here -->
-            </div>
+            <div id="studentTableContent"></div>
         </div>
     </div>
 
-    <!-- Experience Modal -->
     <div id="experienceModal" class="modal">
         <div class="modal-content">
             <span class="modal-close" onclick="closeModal()">&times;</span>
@@ -763,13 +869,21 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                 <h2 id="modalStudentName">Student Name</h2>
                 <p id="modalCompanyName">Company Name</p>
             </div>
-            <div id="modalContent">
-                <!-- Experience rounds will be loaded here -->
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="confirm-modal">
+        <div class="confirm-modal-content">
+            <h3><i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Confirm Delete</h3>
+            <p id="confirmMessage">Are you sure you want to delete this experience?</p>
+            <div class="confirm-modal-actions">
+                <button class="confirm-btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+                <button class="confirm-btn-delete" onclick="confirmDelete()">Delete</button>
             </div>
         </div>
     </div>
 
-    <!-- Add Experience Modal -->
     <div id="addExperienceModal" class="add-experience-modal">
         <div class="add-experience-modal-content">
             <span class="add-experience-modal-close" onclick="closeAddExperienceModal()">&times;</span>
@@ -793,7 +907,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                 <div class="form-row">
                     <div class="form-group">
                         <label for="registerNo">Register Number *</label>
-                        <input type="text" id="registerNo" name="registerNo" required placeholder="e.g., 715522105008, 22ee108">
+                        <input type="text" id="registerNo" name="registerNo" required placeholder="e.g., 715522105008">
                     </div>
                     <div class="form-group">
                         <label for="studentName">Name *</label>
@@ -831,7 +945,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group company-select-group">
+                    <div class="form-group">
                         <label for="companyName">Company Name *</label>
                         <select id="companyName" name="companyName" required>
                             <option value="">Loading companies...</option>
@@ -858,14 +972,14 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                 </div>
 
                 <div class="rounds-section">
-                    <h3><i class="fas fa-clipboard-list"></i> Interview Rounds Experience</h3>
+                    <h3><i class="fas fa-clipboard-list"></i> Interview Rounds Experience (Leave empty if not applicable)</h3>
                     
                     <div class="round-group">
                         <div class="round-label">
                             <i class="fas fa-circle"></i>
                             <span>Round 1</span>
                         </div>
-                        <textarea id="round1" name="round1" placeholder="Describe your experience in Round 1 (e.g., Online test, aptitude, etc.)"></textarea>
+                        <textarea id="round1" name="round1" placeholder="Describe your experience in Round 1"></textarea>
                         <div class="char-count" id="round1Count">0 / 65535 characters</div>
                     </div>
 
@@ -874,7 +988,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                             <i class="fas fa-circle"></i>
                             <span>Round 2</span>
                         </div>
-                        <textarea id="round2" name="round2" placeholder="Describe your experience in Round 2 (e.g., Technical interview, coding, etc.)"></textarea>
+                        <textarea id="round2" name="round2" placeholder="Describe your experience in Round 2"></textarea>
                         <div class="char-count" id="round2Count">0 / 65535 characters</div>
                     </div>
 
@@ -883,7 +997,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                             <i class="fas fa-circle"></i>
                             <span>Round 3</span>
                         </div>
-                        <textarea id="round3" name="round3" placeholder="Describe your experience in Round 3 (e.g., HR round, managerial interview, etc.)"></textarea>
+                        <textarea id="round3" name="round3" placeholder="Describe your experience in Round 3"></textarea>
                         <div class="char-count" id="round3Count">0 / 65535 characters</div>
                     </div>
 
@@ -892,7 +1006,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                             <i class="fas fa-circle"></i>
                             <span>Round 4</span>
                         </div>
-                        <textarea id="round4" name="round4" placeholder="Describe your experience in Round 4 (if applicable)"></textarea>
+                        <textarea id="round4" name="round4" placeholder="Describe your experience in Round 4"></textarea>
                         <div class="char-count" id="round4Count">0 / 65535 characters</div>
                     </div>
 
@@ -901,7 +1015,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                             <i class="fas fa-circle"></i>
                             <span>Round 5</span>
                         </div>
-                        <textarea id="round5" name="round5" placeholder="Describe your experience in Round 5 (if applicable)"></textarea>
+                        <textarea id="round5" name="round5" placeholder="Describe your experience in Round 5"></textarea>
                         <div class="char-count" id="round5Count">0 / 65535 characters</div>
                     </div>
 
@@ -910,7 +1024,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                             <i class="fas fa-circle"></i>
                             <span>Round 6</span>
                         </div>
-                        <textarea id="round6" name="round6" placeholder="Describe your experience in Round 6 (if applicable)"></textarea>
+                        <textarea id="round6" name="round6" placeholder="Describe your experience in Round 6"></textarea>
                         <div class="char-count" id="round6Count">0 / 65535 characters</div>
                     </div>
                 </div>
@@ -928,45 +1042,82 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
     </div>
 
     <script>
-        let currentBatch = null;
-        let currentCompany = null;
-        let companies = [];
-        let canEdit = <?php echo json_encode($canEdit); ?>; // Pass PHP variable to JavaScript
-
-        // Load batches on page load
         document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mobileMenu.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+
+            if (mobileMenuClose) {
+                mobileMenuClose.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            }
+
+            if (mobileMenu) {
+                mobileMenu.addEventListener('click', function(e) {
+                    if (e.target === mobileMenu) {
+                        mobileMenu.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+
+            const mobileMenuLinks = document.querySelectorAll('.mobile-nav-links a');
+            mobileMenuLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+
             loadBatches();
             loadCompaniesForDropdown();
             initializeCharacterCounters();
             initializeFormValidation();
         });
 
-        // Load available companies for dropdown
+        let currentBatch = null;
+        let currentCompany = null;
+        let companies = [];
+        let canEdit = <?php echo json_encode($canEdit); ?>;
+        let deleteRegisterNo = null;
+        let deleteCompanyName = null;
+
         function loadCompaniesForDropdown() {
             const companySelect = document.getElementById('companyName');
             companySelect.innerHTML = '<option value="">Loading companies...</option>';
             
-            // Set a timeout for the request
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
             
-            fetch('get_all_companies.php', {
-                signal: controller.signal
-            })
+            fetch('get_all_companies.php', { signal: controller.signal })
             .then(response => {
                 clearTimeout(timeoutId);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
+                if (!response.ok) throw new Error('Network response was not ok');
                 return response.json();
             })
             .then(data => {
                 companies = data.companies || [];
-                
                 companySelect.innerHTML = '<option value="">Select Company</option>';
                 
                 if (companies.length === 0) {
-                    // Add default companies if none found
                     const defaultCompanies = ['TCS', 'Infosys', 'Wipro', 'Accenture', 'Microsoft', 'Google', 'Amazon'];
                     defaultCompanies.forEach(companyName => {
                         const option = document.createElement('option');
@@ -986,8 +1137,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             .catch(error => {
                 clearTimeout(timeoutId);
                 console.error('Error loading companies:', error);
-                
-                // Load default companies on error
                 companySelect.innerHTML = '<option value="">Select Company</option>';
                 const defaultCompanies = ['TCS', 'Infosys', 'Wipro', 'Accenture', 'Microsoft', 'Google', 'Amazon'];
                 defaultCompanies.forEach(companyName => {
@@ -999,29 +1148,23 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             });
         }
 
-        // Initialize character counters for text areas
         function initializeCharacterCounters() {
             const textAreas = ['round1', 'round2', 'round3', 'round4', 'round5', 'round6'];
             textAreas.forEach(roundId => {
                 const textArea = document.getElementById(roundId);
-                const counter = document.getElementById(roundId + 'Count');
-                
                 textArea.addEventListener('input', function() {
                     updateCharacterCount(roundId);
                 });
             });
         }
 
-        // Update character count and show warnings
         function updateCharacterCount(roundId) {
             const textArea = document.getElementById(roundId);
             const counter = document.getElementById(roundId + 'Count');
-            const maxLength = 65535; // MySQL TEXT field limit
+            const maxLength = 65535;
             const currentLength = textArea.value.length;
             
             counter.textContent = `${currentLength} / ${maxLength} characters`;
-            
-            // Remove existing classes
             counter.classList.remove('warning', 'danger');
             
             if (currentLength > maxLength * 0.9) {
@@ -1030,7 +1173,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                 counter.classList.add('warning');
             }
             
-            // Prevent typing beyond limit
             if (currentLength >= maxLength) {
                 textArea.value = textArea.value.substring(0, maxLength);
                 counter.textContent = `${maxLength} / ${maxLength} characters (Limit reached!)`;
@@ -1038,7 +1180,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             }
         }
 
-        // Initialize form validation
         function initializeFormValidation() {
             const studentNameInput = document.getElementById('studentName');
             studentNameInput.addEventListener('input', function() {
@@ -1049,21 +1190,18 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             form.addEventListener('submit', handleFormSubmit);
         }
 
-        // Open add experience modal
         function openAddExperienceModal() {
             document.getElementById('addExperienceModal').style.display = 'block';
             document.body.style.overflow = 'hidden';
             resetForm();
         }
 
-        // Close add experience modal
         function closeAddExperienceModal() {
             document.getElementById('addExperienceModal').style.display = 'none';
             document.body.style.overflow = '';
             hideMessage();
         }
 
-        // Toggle new company input
         function toggleNewCompanyInput() {
             const newCompanyInput = document.getElementById('newCompanyInput');
             const companySelect = document.getElementById('companyName');
@@ -1080,7 +1218,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             }
         }
 
-        // Handle form submission
         function handleFormSubmit(e) {
             e.preventDefault();
             
@@ -1092,7 +1229,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             
             const formData = new FormData();
             
-            // Get form values
             const registerNo = document.getElementById('registerNo').value.trim();
             const studentName = document.getElementById('studentName').value.trim().toUpperCase();
             const phoneNo = document.getElementById('phoneNo').value.trim();
@@ -1101,7 +1237,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             const package = document.getElementById('package').value;
             const companyType = document.getElementById('companyType').value;
             
-            // Get company name (either from dropdown or new input)
             let companyName = '';
             const newCompanyInput = document.getElementById('newCompanyInput');
             if (newCompanyInput.classList.contains('active')) {
@@ -1110,7 +1245,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                 companyName = document.getElementById('companyName').value;
             }
             
-            // Get round data
             const rounds = {};
             for (let i = 1; i <= 6; i++) {
                 const roundValue = document.getElementById(`round${i}`).value.trim();
@@ -1119,7 +1253,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                 }
             }
             
-            // Validation
             if (!registerNo || !studentName || !yearOfGraduation || !companyName || !package || !companyType) {
                 showMessage('Please fill in all required fields.', 'error');
                 submitBtn.disabled = false;
@@ -1127,7 +1260,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                 return;
             }
             
-            // Prepare form data
             formData.append('registerNo', registerNo);
             formData.append('studentName', studentName);
             formData.append('phoneNo', phoneNo);
@@ -1140,63 +1272,46 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             formData.append('originalRegisterNo', document.getElementById('originalRegisterNo').value);
             formData.append('originalCompanyName', document.getElementById('originalCompanyName').value);
             
-            // Add round data
             Object.keys(rounds).forEach(key => {
                 formData.append(key, rounds[key]);
             });
             
-            // Add new company flag
             if (newCompanyInput.classList.contains('active')) {
                 formData.append('isNewCompany', 'true');
             }
             
-            // Submit form
             fetch('submit_experience.php', {
                 method: 'POST',
                 body: formData
             })
             .then(response => {
-                console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
-                
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
-                return response.text(); // Get as text first
+                return response.text();
             })
             .then(text => {
-                console.log('Raw response:', text);
-                
                 try {
                     const data = JSON.parse(text);
                     if (data.success) {
                         showMessage(data.message, 'success');
-                        
-                        // Reset form after success
                         setTimeout(() => {
                             resetForm();
                             closeAddExperienceModal();
-                            
-                            // Refresh data if we're viewing a batch
                             if (currentBatch) {
                                 loadCompanies(currentBatch);
                             }
-                            
-                            // Refresh company dropdown
                             loadCompaniesForDropdown();
                         }, 2000);
                     } else {
                         showMessage(data.message || 'Unknown error occurred', 'error');
                     }
                 } catch (parseError) {
-                    console.error('JSON parse error:', parseError);
                     showMessage('Server returned invalid response: ' + text.substring(0, 200), 'error');
                 }
             })
             .catch(error => {
-                console.error('Fetch error:', error);
-                showMessage('Network error: ' + error.message + '. Please check if submit_experience.php exists and your server is running.', 'error');
+                showMessage('Network error: ' + error.message, 'error');
             })
             .finally(() => {
                 submitBtn.disabled = false;
@@ -1204,37 +1319,31 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             });
         }
 
-        // Show message
         function showMessage(message, type) {
             const messageDiv = document.getElementById('formMessage');
             messageDiv.textContent = message;
             messageDiv.className = `message ${type} active`;
         }
 
-        // Hide message
         function hideMessage() {
             const messageDiv = document.getElementById('formMessage');
             messageDiv.className = 'message';
         }
 
-        // Reset form
         function resetForm() {
             const form = document.getElementById('addExperienceForm');
             form.reset();
             
-            // Reset edit mode
             document.getElementById('editMode').value = 'false';
             document.getElementById('originalRegisterNo').value = '';
             document.getElementById('originalCompanyName').value = '';
             document.getElementById('editModeHeader').style.display = 'none';
             document.getElementById('formTitle').textContent = 'Add Your Placement Experience';
             
-            // Reset new company input
             const newCompanyInput = document.getElementById('newCompanyInput');
             newCompanyInput.classList.remove('active');
             document.getElementById('companyName').disabled = false;
             
-            // Reset character counters
             const textAreas = ['round1', 'round2', 'round3', 'round4', 'round5', 'round6'];
             textAreas.forEach(roundId => {
                 updateCharacterCount(roundId);
@@ -1243,9 +1352,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             hideMessage();
         }
 
-        // Edit experience function (to be called from student table)
         function editExperience(registerNo, companyName) {
-            // Load experience data
             fetch(`get_experience.php?register_no=${registerNo}&company=${encodeURIComponent(companyName)}`)
                 .then(response => response.json())
                 .then(data => {
@@ -1262,23 +1369,19 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                 });
         }
 
-        // Populate form with existing data for editing
         function populateEditForm(experience, registerNo, companyName) {
-            // Load student data first
             fetch(`get_student_data.php?register_no=${registerNo}`)
                 .then(response => response.json())
                 .then(studentData => {
                     if (studentData.success) {
                         const student = studentData.student;
                         
-                        // Set form to edit mode
                         document.getElementById('editMode').value = 'true';
                         document.getElementById('originalRegisterNo').value = registerNo;
                         document.getElementById('originalCompanyName').value = companyName;
                         document.getElementById('editModeHeader').style.display = 'block';
                         document.getElementById('formTitle').textContent = 'Edit Your Placement Experience';
                         
-                        // Populate form fields
                         document.getElementById('registerNo').value = registerNo;
                         document.getElementById('studentName').value = student.name;
                         document.getElementById('phoneNo').value = student.phone_no || '';
@@ -1287,12 +1390,10 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                         document.getElementById('package').value = parseFloat(experience.package);
                         document.getElementById('companyType').value = experience.company_type || '';
                         
-                        // Set company name
                         setTimeout(() => {
                             document.getElementById('companyName').value = companyName;
                         }, 100);
                         
-                        // Populate rounds
                         const rounds = ['round1', 'round2', 'round3', 'round4', 'round5', 'round6'];
                         rounds.forEach(round => {
                             if (experience[round]) {
@@ -1307,7 +1408,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                 });
         }
 
-        // Load available batches
         function loadBatches() {
             fetch('get_batches.php')
                 .then(response => response.json())
@@ -1336,7 +1436,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                 });
         }
 
-        // Load companies for selected batch
         function loadCompanies(batch) {
             currentBatch = batch;
             document.getElementById('companyTableTitle').textContent = `Companies - Batch ${batch}`;
@@ -1386,7 +1485,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                 });
         }
 
-        // Load students for selected company
         function loadStudents(companyName) {
             currentCompany = companyName;
             document.getElementById('studentTableTitle').textContent = `Students - ${companyName}`;
@@ -1409,15 +1507,18 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                                         <th>Email</th>
                                         <th>Package (LPA)</th>
                                         <th>Experience</th>
-                                        ${canEdit ? '<th>Edit</th>' : ''}
+                                        ${canEdit ? '<th>Actions</th>' : ''}
                                     </tr>
                                 </thead>
                                 <tbody>
                         `;
                         
                         data.students.forEach((student, index) => {
-                            const editButton = canEdit ? 
-                                `<td><button class="experience-link" style="background: #f39c12;" onclick="editExperience('${student.register_no}', '${currentCompany}')">Edit</button></td>` : 
+                            const actionButtons = canEdit ? 
+                                `<td>
+                                    <button class="experience-link" style="background: #f39c12;" onclick="editExperience('${student.register_no}', '${currentCompany}')">Edit</button>
+                                    <button class="delete-btn" onclick="deleteExperience('${student.register_no}', '${currentCompany}', '${student.name}')"><i class="fas fa-trash"></i> Delete</button>
+                                </td>` : 
                                 '';
                             
                             tableHTML += `
@@ -1429,7 +1530,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                                     <td>${student.mail || 'N/A'}</td>
                                     <td>${parseFloat(student.package).toFixed(2)}</td>
                                     <td><button class="experience-link" onclick="showExperience('${student.register_no}', '${student.name}', '${currentCompany}')">View Experience</button></td>
-                                    ${editButton}
+                                    ${actionButtons}
                                 </tr>
                             `;
                         });
@@ -1446,7 +1547,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                 });
         }
 
-        // Show experience modal
         function showExperience(registerNo, studentName, companyName) {
             document.getElementById('modalStudentName').textContent = studentName;
             document.getElementById('modalCompanyName').textContent = companyName;
@@ -1490,7 +1590,54 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                 });
         }
 
-        // Navigation functions
+        function deleteExperience(registerNo, companyName, studentName) {
+            deleteRegisterNo = registerNo;
+            deleteCompanyName = companyName;
+            
+            document.getElementById('confirmMessage').innerHTML = 
+                `Are you sure you want to delete the placement experience of<br><strong>${studentName}</strong> at <strong>${companyName}</strong>?<br><br>This action cannot be undone.`;
+            document.getElementById('confirmModal').style.display = 'block';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            deleteRegisterNo = null;
+            deleteCompanyName = null;
+        }
+
+        function confirmDelete() {
+            if (!deleteRegisterNo || !deleteCompanyName) {
+                closeConfirmModal();
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('register_no', deleteRegisterNo);
+            formData.append('company_name', deleteCompanyName);
+
+            fetch('delete_experience.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Experience deleted successfully!');
+                    closeConfirmModal();
+                    loadStudents(currentCompany);
+                    loadCompaniesForDropdown();
+                } else {
+                    alert('Error deleting experience: ' + (data.message || 'Unknown error'));
+                    closeConfirmModal();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting experience: ' + error.message);
+                closeConfirmModal();
+            });
+        }
+
         function showBatchSelection() {
             document.getElementById('batchContainer').style.display = 'block';
             document.getElementById('companyTableContainer').classList.remove('active');
@@ -1509,16 +1656,19 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             document.getElementById('studentTableContainer').classList.add('active');
         }
 
-        // Close modal
         function closeModal() {
             document.getElementById('experienceModal').style.display = 'none';
         }
 
-        // Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('experienceModal');
             if (event.target === modal) {
                 modal.style.display = 'none';
+            }
+            
+            const confirmModal = document.getElementById('confirmModal');
+            if (event.target === confirmModal) {
+                confirmModal.style.display = 'none';
             }
         }
     </script>

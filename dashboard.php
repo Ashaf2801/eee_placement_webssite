@@ -1,15 +1,21 @@
 <?php
 session_start();
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
+// Check if user is logged in - using mail_id instead of user_id
+if (!isset($_SESSION['mail_id']) || !isset($_SESSION['user_type'])) {
     header('Location: index.html');
     exit();
 }
 
 // Get user information
-$currentUserId = $_SESSION['user_id'];
-$currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
+$currentUserMail = $_SESSION['mail_id'];
+$currentUserType = $_SESSION['user_type'];
+$username = $_SESSION['user_name'] ?? 'User';
+$firstLetter = strtoupper(substr($username, 0, 1));
+
+// If you have a separate db_user_type, adjust accordingly
+// $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
+$currentYear = date('Y');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -45,53 +51,85 @@ $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
             top: 0;
             z-index: 100;
         }
-        
+
         .logo-container {
             display: flex;
             align-items: center;
         }
-        
+
         .logo {
             height: 50px;
             margin-right: 15px;
         }
-        
+
         .nav-title {
             font-size: 22px;
             font-weight: bold;
         }
-        
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
         .nav-links {
             display: flex;
-            gap: 20px;
+            gap: 15px;
         }
-        
+
         .nav-links a {
             color: white;
             text-decoration: none;
             font-weight: 500;
-            padding: 8px 12px;
-            border-radius: 4px;
-            transition: background-color 0.3s;
+            padding: 10px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
         }
-        
+
         .nav-links a:hover {
             background-color: #34495e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
-        
+
+        .nav-links a:active {
+            transform: translateY(0);
+        }
+
         .user-info {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            padding: 8px 16px;
+            background: #2c3e50;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
-        
-        .user-info img {
-            width: 40px;
-            height: 40px;
+
+        .user-avatar {
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
-            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
-        
+
+        .user-info span {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
         /* Mobile Menu Button */
         .mobile-menu-btn {
             display: none;
@@ -100,7 +138,13 @@ $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
             color: white;
             font-size: 20px;
             cursor: pointer;
-            padding: 5px;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .mobile-menu-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
         }
         
         /* Mobile Menu Overlay */
@@ -111,86 +155,229 @@ $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
             z-index: 999;
         }
-        
+
         .mobile-menu-content {
             position: fixed;
             top: 0;
-            right: -300px;
-            width: 300px;
+            right: -400px;
+            width: 350px;
             height: 100%;
-            background: #2c3e50;
-            transition: right 0.3s ease;
-            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0;
             overflow-y: auto;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
         }
-        
+
         .mobile-menu.active {
             display: block;
         }
-        
+
         .mobile-menu.active .mobile-menu-content {
             right: 0;
         }
-        
+
         .mobile-menu-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #34495e;
+            padding: 0.1px 10px 0.1px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
+        .mobile-menu-header h3 {
+            color: white;
+            font-size: 2px;
+            font-weight: 600;
+            margin: 0;
+        }
+
         .mobile-menu-close {
-            background: none;
+            background: rgba(255, 255, 255, 0.1);
             border: none;
             color: white;
-            font-size: 24px;
+            font-size: 22px;
             cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
-        
+
+        .mobile-menu-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
         .mobile-nav-links {
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 20px 25px;
         }
-        
+
         .mobile-nav-links a {
             color: white;
             text-decoration: none;
             font-weight: 500;
-            padding: 12px 15px;
-            border-radius: 4px;
-            transition: background-color 0.3s;
+            padding: 16px 20px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .mobile-nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+
+        }
+
+        .mobile-nav-links a:hover::before {
+            left: 100%;
+        }
+
         .mobile-nav-links a:hover {
-            background-color: #34495e;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(8px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
-        
+
+        .mobile-nav-links a:active {
+            transform: translateX(4px);
+        }
+
+        .mobile-nav-links a i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
         .mobile-user-info {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background: #34495e;
-            border-radius: 8px;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 20px 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
-        
-        .mobile-user-info img {
+
+        .mobile-user-avatar {
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
-        
+
+        .mobile-user-info div {
+            flex: 1;
+        }
+
+        .mobile-user-info div div:first-child {
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .mobile-user-info div div:last-child {
+            font-size: 13px;
+            color: #bdc3c7;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        /* Mobile menu scrollbar */
+        .mobile-menu-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .mobile-menu-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .mobile-menu-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .mobile-menu-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .mobile-logout-link {
+            background: linear-gradient(135deg, #0080ffff 0%, #006effff 100%) !important;
+            margin-top: 10px;
+            border: none;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mobile-logout-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        .mobile-logout-link:hover::before {
+            left: 100%;
+        }
+
+        .mobile-logout-link:hover {
+            background: linear-gradient(135deg, #006effff 0%, #0055ccff 100%) !important;
+            transform: translateX(8px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
         /* Main Content Styles */
         .container {
             max-width: 1200px;
@@ -198,6 +385,33 @@ $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
             padding: 0 20px;
         }
         
+        .intro-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .intro-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .intro-content {
+            padding: 10px 0;
+        }
+
+        .intro-content p {
+            color: #34495e;
+            line-height: 1.8;
+            font-size: 16px;
+            margin-bottom: 0;
+        }
+
         .dashboard-header {
             margin-bottom: 30px;
             text-align: center;
@@ -559,6 +773,65 @@ $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
             }
         }
         
+        /* Updated Responsive Design */
+        @media (max-width: 1200px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .user-info {
+                display: none;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+            
+            .tree-container {
+                padding: 15px;
+            }
+            
+            .tree ul {
+                padding-left: 25px;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 28px;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+
+            .topic-modal-content {
+                width: 95%;
+                margin: 5% auto;
+            }
+
+            .topic-modal-header {
+                padding: 20px 15px;
+            }
+
+            .topic-modal-header h2 {
+                font-size: 22px;
+                padding-right: 40px;
+            }
+
+            .topic-modal-body {
+                padding: 20px 15px;
+            }
+
+            .resource-links {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 480px) {
             .navbar {
                 padding: 12px 15px;
@@ -589,19 +862,25 @@ $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Itechlogo.png/738px-Itechlogo.png" alt="PSG iTech Logo" class="logo">
             <span class="nav-title">EEE Department</span>
         </div>
-        <div class="nav-links">
-            <a href="placement_experience.php"><i class="fas fa-book"></i> PLACED EXPERIENCE</a>
-            <a href="chatbot.php"><i class="fas fa-pencil-alt"></i> PREP WITH AI</a>
-            <?php if (in_array($currentUserType, ['admin', 'faculty'])): ?>
-                <a href="admin_panel.php"><i class="fas fa-user-shield"></i> Admin Panel</a>
-            <?php endif; ?>
-            <a href="logout.php" style="background: #e74c3c;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
+        
+        <div class="nav-content">
+            <div class="nav-links">
+                <a href="dashboard.php" style="background: #34495e;"><i class="fas fa-home"></i> HOME</a>
+                <a href="placement_experience.php"><i class="fas fa-book"></i> PLACED EXPERIENCE</a>
+                <a href="chatbot.php"><i class="fas fa-pencil-alt"></i> PREP WITH AI</a>
+                <?php if (in_array($currentUserType, ['admin', 'faculty'])): ?>
+                    <a href="admin_panel.php"><i class="fas fa-user-shield"></i> Admin Panel</a>
+                <?php endif; ?>
+                <a href="logout.php" style="background: #009dffff;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar"><?php echo $firstLetter; ?></div>
+                <span><?php echo htmlspecialchars($username); ?></span>
+                <small style="font-size: 11px; opacity: 0.8;">(<?php echo ucfirst($currentUserType); ?>)</small>
+            </div>
         </div>
-        <div class="user-info">
-            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
-            <span><?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?></span>
-            <small style="font-size: 11px; opacity: 0.8;">(<?php echo ucfirst($currentUserType); ?>)</small>
-        </div>
+        
         <button class="mobile-menu-btn" id="mobileMenuBtn">
             <i class="fas fa-bars"></i>
         </button>
@@ -611,29 +890,61 @@ $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
     <div class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-content">
             <div class="mobile-menu-header">
-                <h3>Menu</h3>
+                <div class="mobile-user-info">
+                <div>
+                    <div style="font-weight: 700; font-size: 16px; color: white; margin-bottom: 2px;"><?php echo htmlspecialchars($username); ?>
+                    <div style="font-size: 13px; color: #bdc3c7; background: rgba(255, 255, 255, 0.1); padding: 1px 10px; border-radius: 20px; display: inline-block; font-weight: 500;"><?php echo ucfirst($currentUserType); ?></div></div>
+                </div>
+            </div>
                 <button class="mobile-menu-close" id="mobileMenuClose">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
+            
             <div class="mobile-nav-links">
-                <a href="placement_experience.php"><i class="fas fa-book"></i> PLACED EXPERIENCE</a>
-                <a href="chatbot.php"><i class="fas fa-pencil-alt"></i> PREP WITH AI</a>
-                <a href="logout.php" style="background: #e74c3c;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
+                <a href="dashboard.php">
+                    <i class="fas fa-home"></i>
+                    <span>HOME</span>
+                </a>
+                <a href="placement_experience.php">
+                    <i class="fas fa-book"></i>
+                    <span>PLACED EXPERIENCE</span>
+                </a>
+                <a href="chatbot.php">
+                    <i class="fas fa-pencil-alt"></i>
+                    <span>PREP WITH AI</span>
+                </a>
+                <?php if (in_array($currentUserType, ['admin', 'faculty'])): ?>
+                    <a href="admin_panel.php">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Admin Panel</span>
+                    </a>
+                <?php endif; ?>
+                
+                <!-- Logout as a regular nav link -->
+                <a href="logout.php" class="mobile-logout-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>LOGOUT</span>
+                </a>
             </div>
-            <div class="mobile-user-info">
-                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
-                <div>
-                    <div style="font-weight: bold;"><?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?></div>
-                    <div style="font-size: 14px; color: #bdc3c7;"><?php echo ucfirst($currentUserType); ?></div>
-                </div>
-            </div>
+
+            <!-- User Info at Bottom -->
+            
         </div>
     </div>
 
     <!-- Main Content -->
     <div class="container">
         <!-- Tree Structure -->
+         <div class="intro-container">
+            <h2 class="intro-title">Introduction</h2>
+            <div class="intro-content">
+                <p>
+                    <!-- Add your introduction paragraph here -->
+                </p>
+            </div>
+        </div>
+
         <div class="tree-container">
             <h2 class="tree-title">Preparation Topics</h2>
             <ul class="tree" id="preparationTree">
@@ -672,25 +983,14 @@ $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
                                     <span class="toggle">+</span>
                                     <span class="content">DIGITAL</span>
                                     <ul>
+                                        <li><span class="toggle" style="visibility: hidden;"></span><span class="content">C</span></li>
                                         <li><span class="toggle" style="visibility: hidden;"></span><span class="content">DIGITAL ELECTRONICS</span></li>
                                         <li><span class="toggle" style="visibility: hidden;"></span><span class="content">DIGITAL SIGNAL PROCESSING</span></li>
                                         <li><span class="toggle" style="visibility: hidden;"></span><span class="content">VERILOG</span></li>
                                         <li><span class="toggle" style="visibility: hidden;"></span><span class="content">VLSI</span></li>
-                                        <li><span class="toggle" style="visibility: hidden;"></span><span class="content">CMOS PHYSICS</span></li>
                                         <li><span class="toggle" style="visibility: hidden;"></span><span class="content">STATIC TIMING ANALYSIS</span></li>
                                         <li><span class="toggle" style="visibility: hidden;"></span><span class="content">COMPUTER ARCHITECTURE AND ORGANIZATION</span></li>
-                                        <li><span class="toggle" style="visibility: hidden;"></span><span class="content">C</span></li>
-                                        <li><span class="toggle" style="visibility: hidden;"></span><span class="content">LOW POWER DESIGN TECHNIQUES</span></li>
-                                        <li>
-                                            <span class="toggle">+</span>
-                                            <span class="content">MISCELLANEOUS</span>
-                                            <ul>
-                                                <li><span class="toggle" style="visibility: hidden;"></span><span class="content">FIFO DEPTH CALCULATIONS</span></li>
-                                                <li><span class="toggle" style="visibility: hidden;"></span><span class="content">STUCK AT FAULT</span></li>
-                                                <li><span class="toggle" style="visibility: hidden;"></span><span class="content">CLOCK DOMAIN CROSSING</span></li>
-                                                <li><span class="toggle" style="visibility: hidden;"></span><span class="content">ELECTRIC CIRCUIT ANALYSIS</span></li>
-                                            </ul>
-                                        </li>
+                                        <li><span class="toggle" style="visibility: hidden;"></span><span class="content">ELECTRIC CIRCUIT ANALYSIS</span></li>
                                     </ul>
                                 </li>
                             </ul>
@@ -880,7 +1180,7 @@ $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
     </div>
 
     <footer>
-        <p>Department of EEE - PSG iTech © 2025. All rights reserved.</p>
+        <p>Department of EEE - PSG iTech © <?php echo $currentYear; ?>. All rights reserved.</p>
     </footer>
 
     <!-- Topic Content Modal -->
@@ -898,28 +1198,86 @@ $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Mobile menu functionality
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const mobileMenu = document.getElementById('mobileMenu');
-            const mobileMenuClose = document.getElementById('mobileMenuClose');
+        console.log('DOM loaded - initializing mobile menu');
+        
+        // Mobile menu functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuClose = document.getElementById('mobileMenuClose');
 
-            mobileMenuBtn.addEventListener('click', function() {
+        console.log('Mobile menu elements found:', {
+            menuBtn: !!mobileMenuBtn,
+            menu: !!mobileMenu,
+            closeBtn: !!mobileMenuClose
+        });
+
+        // Open mobile menu
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', function(e) {
+                console.log('Mobile menu button clicked');
+                e.stopPropagation();
                 mobileMenu.classList.add('active');
                 document.body.style.overflow = 'hidden';
             });
+        } else {
+            console.error('Mobile menu button not found!');
+        }
 
-            mobileMenuClose.addEventListener('click', function() {
+        // Close mobile menu
+        if (mobileMenuClose) {
+            mobileMenuClose.addEventListener('click', function(e) {
+                console.log('Mobile menu close button clicked');
+                e.stopPropagation();
                 mobileMenu.classList.remove('active');
                 document.body.style.overflow = '';
             });
+        } else {
+            console.error('Mobile menu close button not found!');
+        }
 
-            // Close menu when clicking overlay
+        // Close menu when clicking overlay
+        if (mobileMenu) {
             mobileMenu.addEventListener('click', function(e) {
                 if (e.target === mobileMenu) {
+                    console.log('Mobile menu overlay clicked');
                     mobileMenu.classList.remove('active');
                     document.body.style.overflow = '';
                 }
             });
+        } else {
+            console.error('Mobile menu not found!');
+        }
+
+        // Mobile menu link handling - SIMPLE AND RELIABLE
+        const mobileMenuLinks = document.querySelectorAll('.mobile-nav-links a');
+        console.log('Found mobile menu links:', mobileMenuLinks.length);
+        
+        mobileMenuLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                console.log('Mobile menu link clicked:', this.href);
+                
+                // Close the menu first
+                mobileMenu.classList.remove('active');
+                document.body.style.overflow = '';
+                
+                // For logout, let it proceed normally
+                if (this.href.includes('logout.php')) {
+                    console.log('Logout link - proceeding normally');
+                    return true;
+                }
+                
+                // For other links, let the browser handle navigation normally
+                console.log('Navigation link - proceeding normally');
+            });
+        });
+
+        // Close menu when pressing Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
+                mobileMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
 
             // Tree functionality
             const treeItems = document.querySelectorAll('#preparationTree li');
@@ -1032,6 +1390,132 @@ $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
             const aptitudeTopics = ['PUZZLES', 'NUMBERS', 'SIMPLE EQUATIONS', 'RATIO AND PREPARATION', 'AVERAGES', 'PERCENTAGE', 'LCM AND HCF', 'PROFIT AND LOSS', 'DISCOUNTS', 'SIMPLE INTEREST', 'COMPUND INTEREST', 'SPEED, DISTANCE AND TIME', 'PROBLEMS RELATED TO TRAIN', 'BOATS AND STREAMS', 'TIME AND WORK', 'PIPES AND CISTERN', 'PERMUTATION AND COMBINATION', 'PROBABILITY', 'TABLES', 'BAR CHARTS', 'GRAPHS', 'PIE CHARTS', 'PROBLEMS ON AGE', 'MIXTURES AND ALLIGATIONS', 'PARNERSHIP', 'TRIGNOMENTRY AND LOGARITHM', 'DIRECTIONS', 'BLOOD RELATIONS', 'SYLLOGISMS', 'CODING AND DECODING', 'NUMBERS AND LETTERS SERIES', 'DATA SUFFICIENCY', 'READING COMPREHENSION','SENTENCE CORRECTIONS','ACTIVE AND PASSIVE VOICE', 'SYNONYMS AND ANTONYMS', 'PARAJUMBLES', 'ARTICLES, PREPOSITONS', 'IDIOMS AND PHRASES'];
 
             const topicContent = {
+                'PROTECTION SWITCH GEAR':{
+                    overview: '',
+                    resources: [
+                        { title: '', link: '' }
+                    ],
+                    keyTopics: [
+                        ''
+                    ],
+                    videos: [
+                        { title: '', link: '' }
+                    ],
+                    additionalResources: [
+                        {title: '', link: '', description: '' }
+                    ]
+                },
+                'EMBEDDED SYSTEMS':{
+                    overview: '',
+                    resources: [
+                        { title: '', link: '' }
+                    ],
+                    keyTopics: [
+                        ''
+                    ],
+                    videos: [
+                        { title: '', link: '' }
+                    ],
+                    additionalResources: [
+                        {title: '', link: '', description: '' }
+                    ]
+                },
+                'PLC':{
+                    overview: '',
+                    resources: [
+                        { title: '', link: '' }
+                    ],
+                    keyTopics: [
+                        ''
+                    ],
+                    videos: [
+                        { title: '', link: '' }
+                    ],
+                    additionalResources: [
+                        {title: '', link: '', description: '' }
+                    ]
+                },
+                'DIGITAL SIGNAL PROCESSING':{
+                    overview: '',
+                    resources: [
+                        { title: '', link: '' }
+                    ],
+                    keyTopics: [
+                        ''
+                    ],
+                    videos: [
+                        { title: '', link: '' }
+                    ],
+                    additionalResources: [
+                        {title: '', link: '', description: '' }
+                    ]
+                },
+                'POWER SYSTEM':{
+                    overview: 'Power Systems is the backbone of electrical engineering, focusing on the generation, transmission, distribution, and control of electric power. It integrates concepts from electrical machines, power electronics, and control systems to ensure reliable, efficient, and stable power delivery. The subject covers power generation from conventional and renewable sources, economic dispatch, transmission line performance, system protection, load flow studies, fault analysis, stability, and compensation techniques. Understanding how power is generated, transmitted, and maintained under various operating and fault conditions is essential for power sector roles, grid operation, and utility based placements.',
+                    resources: [
+                        { title: 'Power System - S.Lavanya', link: 'https://drive.google.com/drive/folders/1nRqgZmGGdp8ZdvHVX0rwzWwizhaaPDD7' }
+                    ],
+                    keyTopics: [
+                        'Power Generation and Transmission: Know the basics of conventional and non-conventional generation, economic load dispatch, and HVDC/AC transmission with their parameters, losses, and efficiency considerations.',
+                        'System Analysis and Control: Understand per-unit systems, load flow methods (Gauss-Seidel, Newton-Raphson), voltage/frequency control, and economic load dispatch - crucial for grid performance analysis.',
+                        'Protection and Fault Studies: Be clear with symmetrical components, sequence networks, fault types, and protection schemes (overcurrent, differential, distance) along with circuit breaker operation and ratings.',
+                        'Stability and Compensation: Grasp system stability concepts (steady-state, transient, dynamic), equal area criterion, and compensation methods (series/shunt, FACTS devices) for maintaining power quality and system reliability.'
+                    ],
+                    videos: [
+                        { title: 'Power System - Neso Academy', link: 'https://www.youtube.com/playlist?list=PLBlnK6fEyqRi17rO6B3_XHtMqAKXQ0Tp4' },
+                        { title: 'Power System - Lectures in Electrical Engineering', link: 'https://www.youtube.com/playlist?list=PL_mruqjnuVd9eT-Lmjdbr0UQVcooVy-tU'}
+                    ],
+                    additionalResources: [
+                        {title: 'Electrical Power System', link: 'https://www.electrical4u.com/power-system/', description: 'Electrical4U' },
+                        {title: 'Power System Interview Questions', link: 'https://forumelectrical.com/power-system-interview-questions/', description: 'ForumElectrical.Com'},  
+                        {title: 'Interview Preparation', link: 'https://www.withoutbook.com/InterviewQuestionList.php?tech=122&dl=Top&s=Power%20System%20Interview%20Questions%20and%20Answers', description: 'Without Book'}  
+                    ]
+                },
+                'POWER ELECTRONICS':{
+                    overview: 'Power Electronics deals with the conversion, control, and conditioning of electric power using semiconductor devices. It bridges electrical machines and electronic control, enabling efficient energy conversion in modern systems such as motor drives, converters, and renewable energy applications. The subject focuses on power semiconductor devices like SCR, MOSFET, and IGBT, their switching characteristics, and gate control methods. It also covers converter types - DC-DC (buck, boost, buck-boost), AC-DC (rectifiers), and AC-AC (inverters and choppers) - along with modulation techniques, harmonic analysis, and applications in speed control, voltage regulation, and industrial automation.',
+                    resources: [
+                        { title: 'Power Electronics - Dr. A. Geetha ', link: 'https://drive.google.com/drive/folders/1wcv_0nMWaIBS_gjK-rSI_KRDmIWNSq8W' }
+                    ],
+                    keyTopics: [
+                        'Device Knowledge: Understand the characteristics, triggering, and switching behavior of SCR, MOSFET, and IGBT - the core components in converters and drives.',
+                        'Converter Fundamentals: Know the operation, waveforms, and efficiency of DC-DC converters, rectifiers (AC-DC), and inverters (AC AC), including CCM and DCM modes.',
+                        'Control Techniques: Learn about firing angle control, PWM methods (especially SPWM), and how they influence output voltage, harmonics, and power factor.',
+                        'Applications and Analysis: Focus on how converters are used in motor speed control, power supplies, and renewable energy systems, emphasizing performance parameters like THD and efficiency - common in placement interviews. '
+                    ],
+                    videos: [
+                        { title: 'Power Electronics - Lectures in Electrical Engineering', link: 'https://www.youtube.com/playlist?list=PL_mruqjnuVd9_mwhgK3nAy-cHyslXCnRk' },
+                        { title: 'Power Electronics in Tamil', link: 'https://www.youtube.com/playlist?list=PLMC_fsTBvdNivP8fPZrVsW7rPW1EMlqOM'}
+                    ],
+                    additionalResources: [
+                        { title: 'Power Electronics - Circuit Diagram', link: 'https://www.electrical4u.com/electrical-engineering-articles/power-electronics/', description: 'Electrical4U' },
+                        { title: 'MCQs on Power Electronics', link: 'https://www.electrical4u.com/electrical-mcq.php?subject=power-electronics&page=1', description: 'Electrical4U'},
+                        { title: 'Top Interview Questions', link: 'https://www.learnelectronicsindia.com/post/top-30-interview-questions-answers-for-power-electronics-engineer?srsltid=AfmBOooW0q-DKUyHf5kxCyA5-21xrkFMCJJHvWdqqEcXaSF1PMpArNzM', description: 'Learn Electronics India'}
+
+                    ]
+                },
+                'ELECTRICAL MACHINES':{
+                    overview: 'Electrical Machines form the foundation of power conversion systems, covering the principles, construction, performance, and control of transformers, DC machines, induction motors, and synchronous machines. The subject explains how electrical energy is converted to mechanical energy (and vice versa) through electromagnetic induction. It includes detailed study of transformers for power transfer, DC machines for variable speed and torque control, induction motors for industrial drives, and synchronous machines for power generation and factor correction. Understanding machine characteristics, equivalent circuits, testing methods, losses, and efficiency is crucial for design, operation, and maintenance in power and industrial systems.',
+                    resources: [
+                        { title: 'ELECTRICAL MACHINES-I', link: 'https://mrcet.com/downloads/digital_notes/EEE/EM-I%20DIGITAL%20NOTES%20LATEST-EEE.pdf' },
+                        { title: 'Fundamentals of Electric Circuits by Charles Alexander Matthew Sadiku', link: 'https://www.eeekenya.com/wp-content/uploads/2016/04/Electrical-Interview-Questions-Answers.pdf'}
+                    ],
+                    keyTopics: [
+                        'Core Understanding: Know the working principles, EMF equations, and construction details of transformers, DC, induction, and synchronous machines.',
+                        'Performance Analysis: Be able to draw and interpret equivalent circuits, phasor diagrams, torque-speed characteristics, and efficiency conditions.',
+                        'Testing and Control: Understand standard tests (OC, SC, load tests) and control methods for speed, torque, and voltage regulation.',
+                        'Applications and Problem Solving: Focus on real-world applications in power systems, motor drives, and generation—key areas for technical interviews and aptitude tests.'
+                    ],
+                    videos: [
+                        { title: 'ELECTRICAL MACHINES - Dr.Jayaudhaya', link: 'https://www.youtube.com/playlist?list=PLQTXUrE24B81jr2iEuIF9CpsB3JPs_SOc' },
+                        { title: 'ELECTRICAL MACHINES - NPTEL', link: 'https://www.youtube.com/playlist?list=PLp6ek2hDcoNCANsWM2mw3qi0387BhfLyV' }
+                    ],
+                    additionalResources: [
+                        {title: 'Types of Electric Machines', link: 'https://www.geeksforgeeks.org/electrical-engineering/types-of-electric-machines/', description: 'GeeksforGeeks Article' },
+                        { title: 'Electric Machines Transformers Generators and Motors', link: 'https://www.electrical4u.com/electric-machines/', description: 'Electrical4U' },
+                        { title: 'Top Electrical Machines Interview Questions', link: 'https://www.iscalepro.com/post/electrical-machines-interview-questions/', description: 'iScalePro' },
+                        { title: 'MCQs on Electrical Machines', link: 'https://www.electrical4u.com/electrical-mcq.php?subject=electrical-machines&page=1', description: 'MCQs - Electrical 4 U' }
+                    ]
+                },
                 'ELECTRIC CIRCUIT ANALYSIS':{
                     overview: 'Electric Circuit Analysis is a fundamental subject in electrical engineering that deals with the study of electrical circuits and their behavior. It covers various concepts such as Ohm\'s Law, Kirchhoff\'s Laws, network theorems, transient and steady-state analysis, and AC/DC circuit analysis. Understanding these concepts is crucial for designing and analyzing electrical systems.',
                     resources: [

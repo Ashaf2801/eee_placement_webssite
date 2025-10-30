@@ -38,7 +38,7 @@ try {
             INNER JOIN student s ON p.register_no = s.register_no 
             WHERE s.year_of_graduation = :batch 
             GROUP BY p.company_name 
-            ORDER BY student_count DESC, avg_package DESC";
+            ORDER BY avg_package DESC, student_count DESC";
     
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':batch', $batch, PDO::PARAM_INT);

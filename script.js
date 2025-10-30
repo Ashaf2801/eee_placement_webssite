@@ -110,7 +110,7 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
         if (data.success) {
             showSuccess(data.message);
             
-            // Redirect to dashboard.html after successful login
+            // Redirect to dashboard after successful login
             setTimeout(() => {
                 window.location.href = 'dashboard.php';
             }, 1500);
@@ -139,19 +139,48 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// Search functionality - Add this event listener
-document.getElementById('userSearch').addEventListener('input', function() {
-    if (window.allUsers) {
-        renderUserTable(window.allUsers);
+// Initialize the form
+document.addEventListener('DOMContentLoaded', function() {
+    // Set default login type
+    switchLoginType('student');
+    
+    // Only initialize admin panel functions if we're on the admin page
+    if (document.getElementById('userSearch')) {
+        initializeAdminFunctions();
     }
 });
 
-// Initialize the form
-document.addEventListener('DOMContentLoaded', function() {
-    loadUsers();
-    loadBatches();
-    // Add this line to enable live search
-    document.getElementById('userSearch').addEventListener('input', function() {
-        renderUserTable(window.allUsers || []);
-    });
-});
+// Admin panel functions (only used in admin panel)
+function initializeAdminFunctions() {
+    // Check if elements exist before adding event listeners
+    const userSearch = document.getElementById('userSearch');
+    if (userSearch) {
+        userSearch.addEventListener('input', function() {
+            if (window.allUsers) {
+                renderUserTable(window.allUsers);
+            }
+        });
+    }
+    
+    // Load admin data if on admin page
+    if (document.querySelector('.admin-container')) {
+        loadUsers();
+        loadBatches();
+    }
+}
+
+// Placeholder functions for admin panel (define these in your admin JS file)
+function loadUsers() {
+    console.log('loadUsers function called - implement this in admin.js');
+    // This should be implemented in your admin panel JavaScript
+}
+
+function loadBatches() {
+    console.log('loadBatches function called - implement this in admin.js');
+    // This should be implemented in your admin panel JavaScript
+}
+
+function renderUserTable(users) {
+    console.log('renderUserTable function called - implement this in admin.js');
+    // This should be implemented in your admin panel JavaScript
+}
