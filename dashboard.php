@@ -717,72 +717,13 @@ $currentYear = date('Y');
         }
         
         /* Responsive Design */
-        @media (max-width: 768px) {
-            .navbar {
-                padding: 15px 20px;
-            }
-            
-            .nav-links {
-                display: none;
-            }
-            
-            .user-info {
-                display: none;
-            }
-            
-            .mobile-menu-btn {
-                display: block;
-            }
-            
-            .tree-container {
-                padding: 15px;
-            }
-            
-            .tree ul {
-                padding-left: 25px;
-            }
-            
-            .dashboard-header h1 {
-                font-size: 28px;
-            }
-            
-            .container {
-                padding: 0 15px;
-            }
-
-            .topic-modal-content {
-                width: 95%;
-                margin: 5% auto;
-            }
-
-            .topic-modal-header {
-                padding: 20px 15px;
-            }
-
-            .topic-modal-header h2 {
-                font-size: 22px;
-                padding-right: 40px;
-            }
-
-            .topic-modal-body {
-                padding: 20px 15px;
-            }
-
-            .resource-links {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* Updated Responsive Design */
         @media (max-width: 1200px) {
             .nav-links {
                 display: none;
             }
-            
             .user-info {
                 display: none;
             }
-            
             .mobile-menu-btn {
                 display: block;
             }
@@ -792,7 +733,6 @@ $currentYear = date('Y');
             .navbar {
                 padding: 15px 20px;
             }
-            
             .tree-container {
                 padding: 15px;
             }

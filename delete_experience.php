@@ -13,7 +13,7 @@ define('DB_NAME', 'eee_placement');
 
 try {
     // Check if user is logged in and has permission
-    if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
+    if (!isset($_SESSION['mail_id']) || !isset($_SESSION['user_type'])) {
         throw new Exception('Unauthorized access. Please log in.');
     }
 

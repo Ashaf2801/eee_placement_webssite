@@ -2,7 +2,7 @@
 session_start();
 
 // Check if user is logged in
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
+if (!isset($_SESSION['mail_id']) || !isset($_SESSION['user_type'])) {
     header('Location: index.html');
     exit();
 }

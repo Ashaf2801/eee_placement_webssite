@@ -3,7 +3,7 @@ session_start();
 header('Content-Type: application/json');
 
 // Check if user is admin or faculty
-if (!isset($_SESSION['user_id']) || !in_array($_SESSION['db_user_type'] ?? $_SESSION['user_type'], ['admin', 'faculty'])) {
+if (!isset($_SESSION['mail_id']) || !in_array($_SESSION['user_type'], ['admin', 'faculty'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
     exit();
 }
@@ -15,12 +15,13 @@ define('DB_PASS', '');
 define('DB_NAME', 'eee_placement');
 
 try {
-    $userId = trim($_POST['editUserId'] ?? '');
+    $mailId = trim($_POST['editUserId'] ?? ''); // This is now mail_id
+    $userName = trim($_POST['editUserName'] ?? '');
     $userType = $_POST['editUserType'] ?? '';
     $newPassword = $_POST['editUserPassword'] ?? '';
 
-    if (empty($userId) || empty($userType)) {
-        throw new Exception('User ID and type are required');
+    if (empty($mailId) || empty($userName) || empty($userType)) {
+        throw new Exception('User ID, Name, and Type are required');
     }
 
     if (!in_array($userType, ['student', 'faculty', 'admin'])) {
@@ -39,16 +40,18 @@ try {
 
     // Update user
     if (!empty($newPassword)) {
-        $sql = "UPDATE user SET user_type = :user_type, password = :password WHERE user_id = :user_id";
+        $sql = "UPDATE users SET user_name = :user_name, user_type = :user_type, password = :password WHERE mail_id = :mail_id";
         $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':user_name', $userName);
         $stmt->bindParam(':user_type', $userType);
         $stmt->bindParam(':password', $newPassword);
-        $stmt->bindParam(':user_id', $userId);
+        $stmt->bindParam(':mail_id', $mailId);
     } else {
-        $sql = "UPDATE user SET user_type = :user_type WHERE user_id = :user_id";
+        $sql = "UPDATE users SET user_name = :user_name, user_type = :user_type WHERE mail_id = :mail_id";
         $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':user_name', $userName);
         $stmt->bindParam(':user_type', $userType);
-        $stmt->bindParam(':user_id', $userId);
+        $stmt->bindParam(':mail_id', $mailId);
     }
 
     $stmt->execute();

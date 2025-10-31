@@ -3,7 +3,7 @@ session_start();
 header('Content-Type: application/json');
 
 // Check if user is admin or faculty
-if (!isset($_SESSION['user_id']) || !in_array($_SESSION['db_user_type'] ?? $_SESSION['user_type'], ['admin', 'faculty'])) {
+if (!isset($_SESSION['mail_id']) || !in_array($_SESSION['user_type'], ['admin', 'faculty'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
     exit();
 }
@@ -15,14 +15,14 @@ define('DB_PASS', '');
 define('DB_NAME', 'eee_placement');
 
 try {
-    $userId = trim($_POST['userId'] ?? '');
+    $mailId = trim($_POST['mailId'] ?? '');
 
-    if (empty($userId)) {
+    if (empty($mailId)) {
         throw new Exception('User ID is required');
     }
 
     // Prevent deleting yourself
-    if ($userId === $_SESSION['user_id']) {
+    if ($mailId === $_SESSION['mail_id']) {
         throw new Exception('You cannot delete your own account');
     }
 
@@ -36,9 +36,9 @@ try {
         ]
     );
 
-    $sql = "DELETE FROM user WHERE user_id = :user_id";
+    $sql = "DELETE FROM users WHERE mail_id = :mail_id";
     $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':user_id', $userId);
+    $stmt->bindParam(':mail_id', $mailId);
     $stmt->execute();
 
     if ($stmt->rowCount() > 0) {

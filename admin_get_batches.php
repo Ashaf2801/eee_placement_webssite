@@ -3,7 +3,7 @@ session_start();
 header('Content-Type: application/json');
 
 // Check if user is admin or faculty
-if (!isset($_SESSION['user_id']) || !in_array($_SESSION['db_user_type'] ?? $_SESSION['user_type'], ['admin', 'faculty'])) {
+if (!isset($_SESSION['mail_id']) || !in_array($_SESSION['user_type'], ['admin', 'faculty'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
     exit();
 }

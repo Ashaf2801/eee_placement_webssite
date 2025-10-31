@@ -3,7 +3,7 @@ session_start();
 header('Content-Type: application/json');
 
 // Check if user is admin or faculty
-if (!isset($_SESSION['user_id']) || !in_array($_SESSION['db_user_type'] ?? $_SESSION['user_type'], ['admin', 'faculty'])) {
+if (!isset($_SESSION['mail_id']) || !in_array($_SESSION['user_type'], ['admin', 'faculty'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
     exit();
 }
@@ -25,7 +25,7 @@ try {
         ]
     );
 
-    $sql = "SELECT user_id, user_type FROM user ORDER BY user_type, user_id";
+    $sql = "SELECT mail_id, user_name, user_type FROM users ORDER BY user_type, mail_id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $users = $stmt->fetchAll();

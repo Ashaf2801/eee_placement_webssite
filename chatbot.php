@@ -2,12 +2,12 @@
 session_start();
 
 // Check if user is logged in
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
+if (!isset($_SESSION['mail_id']) || !isset($_SESSION['user_type'])) {
     header('Location: index.html');
     exit();
 }
 
-$currentUserId = $_SESSION['user_id'];
+$currentUserId = $_SESSION['mail_id'];
 $currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
 $currentUsername = $_SESSION['username'] ?? 'User'; // Get username from session
 
@@ -24,7 +24,7 @@ class AIChatSystem {
             CURLOPT_TIMEOUT => 120,
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
-                'X-User-ID: ' . $_SESSION['user_id'],
+                'X-User-ID: ' . $_SESSION['mail_id'],
                 'X-User-Type: ' . $_SESSION['user_type']
             ]
         ];

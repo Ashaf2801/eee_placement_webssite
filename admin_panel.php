@@ -2,12 +2,12 @@
 session_start();
 
 // Check if user is logged in and is admin or faculty
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
+if (!isset($_SESSION['mail_id']) || !isset($_SESSION['user_type'])) {
     header('Location: index.html');
     exit();
 }
 
-$currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
+$currentUserType = $_SESSION['user_type'];
 
 // Only admin and faculty can access this page
 if (!in_array($currentUserType, ['admin', 'faculty'])) {
@@ -15,7 +15,10 @@ if (!in_array($currentUserType, ['admin', 'faculty'])) {
     exit();
 }
 
-$currentUserId = $_SESSION['user_id'];
+$currentUserId = $_SESSION['mail_id'];
+$username = $_SESSION['user_name'] ?? 'User';
+$firstLetter = strtoupper(substr($username, 0, 1));
+$currentYear = date('Y');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -67,28 +70,179 @@ $currentUserId = $_SESSION['user_id'];
             font-weight: bold;
         }
         
+        .nav-content {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        
         .nav-links {
             display: flex;
-            gap: 20px;
+            gap: 15px;
         }
         
         .nav-links a {
             color: white;
             text-decoration: none;
             font-weight: 500;
-            padding: 8px 12px;
-            border-radius: 4px;
-            transition: background-color 0.3s;
+            padding: 10px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
         }
-        
-        .nav-links a:hover {
+
+        .nav-links a:hover,
+        .nav-links a:focus {
             background-color: #34495e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            outline: none;
         }
-        
+
         .user-info {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            padding: 8px 16px;
+            background: #2c3e50;
+            border-radius: 8px;
+        }
+
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-info span {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+
+        .mobile-menu-content {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100%;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .mobile-menu.active {
+            display: block;
+        }
+
+        .mobile-menu.active .mobile-menu-content {
+            right: 0;
+        }
+
+        .mobile-nav-links a:hover::before {
+            left: 100%;
+        }
+
+        .mobile-nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(8px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .mobile-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-menu-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mobile-logout-link:hover::before {
+            left: 100%;
+        }
+
+        .mobile-logout-link:hover {
+            background: linear-gradient(135deg, #006effff 0%, #0055ccff 100%) !important;
+            transform: translateX(8px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 20px 25px;
+        }
+
+        .mobile-nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 16px 20px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-user-info {
+            margin: 20px 25px;
+        }
+
+        .mobile-logout-link {
+            background: linear-gradient(135deg, #0080ffff 0%, #006effff 100%) !important;
+            margin-top: 10px;
         }
         
         /* Container */
@@ -421,25 +575,27 @@ $currentUserId = $_SESSION['user_id'];
             color: #7f8c8d;
         }
         
+        @media (max-width: 1200px) {
+            .nav-links, .user-info {
+                display: none;
+            }
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 0 15px;
             }
-            
             .section-card {
                 padding: 20px 15px;
             }
-            
             .form-grid {
                 grid-template-columns: 1fr;
             }
-            
             .table-container {
                 overflow-x: scroll;
-            }
-            
-            .nav-links {
-                display: none;
             }
         }
     </style>
@@ -449,18 +605,59 @@ $currentUserId = $_SESSION['user_id'];
     <nav class="navbar">
         <div class="logo-container">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Itechlogo.png/738px-Itechlogo.png" alt="PSG iTech Logo" class="logo">
-            <span class="nav-title">Admin Panel</span>
+            <span class="nav-title">EEE Department</span>
         </div>
-        <div class="nav-links">
-            <a href="dashboard.php"><i class="fas fa-home"></i> Dashboard</a>
-            <a href="placement_experience.php"><i class="fas fa-book"></i> Placements</a>
-            <a href="logout.php" style="background: #e74c3c;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        
+        <div class="nav-content">
+            <div class="nav-links">
+                <a href="dashboard.php"><i class="fas fa-home"></i> HOME</a>
+                <a href="placement_experience.php"><i class="fas fa-book"></i> PLACED EXPERIENCE</a>
+                <a href="chatbot.php"><i class="fas fa-pencil-alt"></i> PREP WITH AI</a>
+                <?php if (in_array($currentUserType, ['admin', 'faculty'])): ?>
+                    <a href="admin_panel.php" style="background: #34495e;"><i class="fas fa-user-shield"></i> Admin Panel</a>
+                <?php endif; ?>
+                <a href="logout.php" style="background: #009dffff;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar"><?php echo $firstLetter; ?></div>
+                <span><?php echo htmlspecialchars($username); ?></span>
+                <small style="font-size: 11px; opacity: 0.8;">(<?php echo ucfirst($currentUserType); ?>)</small>
+            </div>
         </div>
-        <div class="user-info">
-            <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
-            <small style="font-size: 11px; opacity: 0.8;">(<?php echo ucfirst($currentUserType); ?>)</small>
-        </div>
+        
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
     </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-content">
+            <div class="mobile-menu-header">
+                <div class="mobile-user-info">
+                    <div>
+                        <div style="font-weight: 700; font-size: 16px; color: white;"><?php echo htmlspecialchars($username); ?>
+                            <div style="font-size: 13px; color: #bdc3c7; background: rgba(255, 255, 255, 0.1); padding: 1px 10px; border-radius: 20px; display: inline-block;"><?php echo ucfirst($currentUserType); ?></div>
+                        </div>
+                    </div>
+                </div>
+                <button class="mobile-menu-close" id="mobileMenuClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href="dashboard.php"><i class="fas fa-home"></i><span>HOME</span></a>
+                <a href="placement_experience.php"><i class="fas fa-book"></i><span>PLACED EXPERIENCE</span></a>
+                <a href="chatbot.php"><i class="fas fa-pencil-alt"></i><span>PREP WITH AI</span></a>
+                <?php if (in_array($currentUserType, ['admin', 'faculty'])): ?>
+                    <a href="admin_panel.php"><i class="fas fa-user-shield"></i><span>Admin Panel</span></a>
+                <?php endif; ?>
+                <a href="logout.php" class="mobile-logout-link"><i class="fas fa-sign-out-alt"></i><span>LOGOUT</span></a>
+            </div>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <div class="container">
@@ -515,12 +712,16 @@ $currentUserId = $_SESSION['user_id'];
                         <div class="user-input-row" data-user-index="0">
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="userId_0">User ID *</label>
-                                    <input type="text" id="userId_0" name="userId[]" required placeholder="e.g., 22EE108">
+                                    <label for="mailId_0">Email ID (Login) *</label>
+                                    <input type="email" id="mailId_0" name="mailId[]" required placeholder="e.g., student@psgitech.ac.in">
+                                </div>
+                                <div class="form-group">
+                                    <label for="userName_0">User Name *</label>
+                                    <input type="text" id="userName_0" name="userName[]" required placeholder="e.g., John Doe">
                                 </div>
                                 <div class="form-group">
                                     <label for="userPassword_0">Password *</label>
-                                    <input type="password" id="userPassword_0" name="userPassword[]" required placeholder="Enter password">
+                                    <input type="text" id="userPassword_0" name="userPassword[]" required placeholder="Enter password">
                                 </div>
                                 <div class="form-group">
                                     <label for="userType_0">User Type *</label>
@@ -554,14 +755,15 @@ $currentUserId = $_SESSION['user_id'];
                 <table id="usersTable">
                     <thead>
                         <tr>
-                            <th>User ID</th>
+                            <th>Email ID</th>
+                            <th>User Name</th>
                             <th>User Type</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="usersTableBody">
                         <tr>
-                            <td colspan="3" class="loading">Loading users...</td>
+                            <td colspan="4" class="loading">Loading users...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -579,6 +781,10 @@ $currentUserId = $_SESSION['user_id'];
             <div class="modal-body">
                 <form id="editUserForm" onsubmit="handleEditUser(event)">
                     <input type="hidden" id="editUserId" name="editUserId">
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label for="editUserName">User Name *</label>
+                        <input type="text" id="editUserName" name="editUserName" required placeholder="Enter user name">
+                    </div>
                     <div class="form-group" style="margin-bottom: 20px;">
                         <label for="editUserType">User Type *</label>
                         <select id="editUserType" name="editUserType" required>
@@ -682,6 +888,37 @@ $currentUserId = $_SESSION['user_id'];
         
         // Load users on page load
         document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mobileMenu.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+
+            if (mobileMenuClose) {
+                mobileMenuClose.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            }
+
+            if (mobileMenu) {
+                mobileMenu.addEventListener('click', function(e) {
+                    if (e.target === mobileMenu) {
+                        mobileMenu.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
             loadUsers();
             loadBatches();
         });
@@ -715,8 +952,9 @@ $currentUserId = $_SESSION['user_id'];
             const searchValue = document.getElementById('userSearch').value.trim().toLowerCase();
 
             let filtered = users.filter(user =>
-                user.user_id.toLowerCase().includes(searchValue) ||
-                user.user_type.toLowerCase().includes(searchValue)
+                user.mail_id.toLowerCase().includes(searchValue) ||
+                (user.user_name && user.user_name.toLowerCase().includes(searchValue)) ||
+                user.user_type.toLowerCase().includes(searchValue) 
             );
 
             // Limit to 10 users
@@ -727,13 +965,14 @@ $currentUserId = $_SESSION['user_id'];
                 filtered.forEach(user => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${user.user_id}</td>
+                        <td>${user.mail_id}</td>
+                        <td>${user.user_name}</td>
                         <td><span style="padding: 4px 12px; background: ${getUserTypeColor(user.user_type)}; color: white; border-radius: 12px; font-size: 12px;">${user.user_type.toUpperCase()}</span></td>
                         <td class="action-buttons">
-                            <button class="btn btn-warning btn-small" onclick="editUser('${user.user_id}', '${user.user_type}')">
+                            <button class="btn btn-warning btn-small" onclick="editUser('${user.mail_id}', '${user.user_name}', '${user.user_type}')">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
-                            <button class="btn btn-danger btn-small" onclick="deleteUser('${user.user_id}')">
+                            <button class="btn btn-danger btn-small" onclick="deleteUser('${user.mail_id}')">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
                         </td>
@@ -741,7 +980,7 @@ $currentUserId = $_SESSION['user_id'];
                     tbody.appendChild(row);
                 });
             } else {
-                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No users found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No users found</td></tr>';
             }
         }
         
@@ -779,9 +1018,10 @@ $currentUserId = $_SESSION['user_id'];
         }
         
         // Edit User
-        function editUser(userId, userType) {
+        function editUser(userId, userName, userType) {
             document.getElementById('editUserId').value = userId;
             document.getElementById('editUserType').value = userType;
+            document.getElementById('editUserName').value = userName;
             document.getElementById('editUserPassword').value = '';
             document.getElementById('editUserModal').style.display = 'block';
             document.body.style.overflow = 'hidden';
@@ -816,13 +1056,13 @@ $currentUserId = $_SESSION['user_id'];
         }
         
         // Delete User
-        function deleteUser(userId) {
-            if (!confirm(`Are you sure you want to delete user: ${userId}?`)) {
+        function deleteUser(mailId) {
+            if (!confirm(`Are you sure you want to delete user: ${mailId}?`)) {
                 return;
             }
             
             const formData = new FormData();
-            formData.append('userId', userId);
+            formData.append('mailId', mailId);
             
             fetch('admin_delete_user.php', {
                 method: 'POST',
@@ -976,12 +1216,16 @@ $currentUserId = $_SESSION['user_id'];
         row.innerHTML = `
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="userId_${userIndex}">User ID *</label>
-                    <input type="text" id="userId_${userIndex}" name="userId[]" required placeholder="e.g., 22EE108">
+                    <label for="mailId_${userIndex}">Email ID (Login) *</label>
+                    <input type="email" id="mailId_${userIndex}" name="mailId[]" required placeholder="e.g., student@psgitech.ac.in">
+                </div>
+                <div class="form-group">
+                    <label for="userName_${userIndex}">User Name *</label>
+                    <input type="text" id="userName_${userIndex}" name="userName[]" required placeholder="e.g., Jane Doe">
                 </div>
                 <div class="form-group">
                     <label for="userPassword_${userIndex}">Password *</label>
-                    <input type="password" id="userPassword_${userIndex}" name="userPassword[]" required placeholder="Enter password">
+                    <input type="text" id="userPassword_${userIndex}" name="userPassword[]" required placeholder="Enter password">
                 </div>
                 <div class="form-group">
                     <label for="userType_${userIndex}">User Type *</label>

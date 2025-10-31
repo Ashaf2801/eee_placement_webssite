@@ -3,7 +3,7 @@ session_start();
 header('Content-Type: application/json');
 
 // Check if user is admin or faculty
-if (!isset($_SESSION['user_id']) || !in_array($_SESSION['db_user_type'] ?? $_SESSION['user_type'], ['admin', 'faculty'])) {
+if (!isset($_SESSION['mail_id']) || !in_array($_SESSION['user_type'], ['admin', 'faculty'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
     exit();
 }
@@ -15,15 +15,16 @@ define('DB_PASS', '');
 define('DB_NAME', 'eee_placement');
 
 try {
-    $userIds = $_POST['userId'] ?? [];
+    $mailIds = $_POST['mailId'] ?? [];
+    $userNames = $_POST['userName'] ?? [];
     $passwords = $_POST['userPassword'] ?? [];
     $userTypes = $_POST['userType'] ?? [];
 
-    if (empty($userIds) || empty($passwords) || empty($userTypes)) {
+    if (empty($mailIds) || empty($userNames) || empty($passwords) || empty($userTypes)) {
         throw new Exception('All fields are required');
     }
 
-    if (count($userIds) !== count($passwords) || count($userIds) !== count($userTypes)) {
+    if (count($mailIds) !== count($userNames) || count($mailIds) !== count($passwords) || count($mailIds) !== count($userTypes)) {
         throw new Exception('Invalid form data');
     }
 
@@ -42,44 +43,46 @@ try {
     $successCount = 0;
     $failedUsers = [];
 
-    for ($i = 0; $i < count($userIds); $i++) {
-        $userId = trim($userIds[$i]);
+    for ($i = 0; $i < count($mailIds); $i++) {
+        $mailId = trim($mailIds[$i]);
+        $userName = trim($userNames[$i]);
         $password = $passwords[$i];
         $userType = $userTypes[$i];
 
         // Validate
-        if (empty($userId) || empty($password) || empty($userType)) {
-            $failedUsers[] = "$userId (empty fields)";
+        if (empty($mailId) || empty($userName) || empty($password) || empty($userType)) {
+            $failedUsers[] = "$mailId (empty fields)";
             continue;
         }
 
         if (!in_array($userType, ['student', 'faculty', 'admin'])) {
-            $failedUsers[] = "$userId (invalid type)";
+            $failedUsers[] = "$mailId (invalid type)";
             continue;
         }
 
         // Check if user already exists
-        $checkSql = "SELECT user_id FROM user WHERE user_id = :user_id";
+        $checkSql = "SELECT mail_id FROM users WHERE mail_id = :mail_id";
         $checkStmt = $pdo->prepare($checkSql);
-        $checkStmt->bindParam(':user_id', $userId);
+        $checkStmt->bindParam(':mail_id', $mailId);
         $checkStmt->execute();
 
         if ($checkStmt->fetch()) {
-            $failedUsers[] = "$userId (already exists)";
+            $failedUsers[] = "$mailId (already exists)";
             continue;
         }
 
         // Insert new user
         try {
-            $sql = "INSERT INTO user (user_id, password, user_type) VALUES (:user_id, :password, :user_type)";
+            $sql = "INSERT INTO users (mail_id, user_name, password, user_type) VALUES (:mail_id, :user_name, :password, :user_type)";
             $stmt = $pdo->prepare($sql);
-            $stmt->bindParam(':user_id', $userId);
+            $stmt->bindParam(':mail_id', $mailId);
+            $stmt->bindParam(':user_name', $userName);
             $stmt->bindParam(':password', $password);
             $stmt->bindParam(':user_type', $userType);
             $stmt->execute();
             $successCount++;
         } catch (Exception $e) {
-            $failedUsers[] = "$userId (error: " . $e->getMessage() . ")";
+            $failedUsers[] = "$mailId (error: " . $e->getMessage() . ")";
         }
     }
 
