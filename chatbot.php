@@ -7,9 +7,11 @@ if (!isset($_SESSION['mail_id']) || !isset($_SESSION['user_type'])) {
     exit();
 }
 
-$currentUserId = $_SESSION['mail_id'];
-$currentUserType = $_SESSION['db_user_type'] ?? $_SESSION['user_type'];
-$currentUsername = $_SESSION['username'] ?? 'User'; // Get username from session
+// Get user information
+$currentUserMail = $_SESSION['mail_id'];
+$currentUserType = $_SESSION['user_type'];
+$username = $_SESSION['user_name'] ?? 'User';
+$firstLetter = strtoupper(substr($username, 0, 1));
 
 // Flask API Configuration
 define('FLASK_API_URL', 'http://127.0.0.1:5001');
@@ -160,6 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
             line-height: 1.6;
         }
         
+        /* Navbar Styles */
         .navbar {
             background-color: #2c3e50;
             color: white;
@@ -172,35 +175,209 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
             top: 0;
             z-index: 100;
         }
-        
+
         .logo-container {
             display: flex;
             align-items: center;
         }
-        
+
         .logo {
             height: 50px;
             margin-right: 15px;
         }
-        
+
         .nav-title {
             font-size: 22px;
             font-weight: bold;
         }
-        
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .nav-links a:hover {
+            background-color: #34495e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-links a:active {
+            transform: translateY(0);
+        }
+
         .user-info {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
+            padding: 8px 16px;
+            background: #2c3e50;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-info span {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .mobile-menu-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
         }
         
-        .user-info img {
+        /* Mobile Menu Overlay */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+        }
+
+        .mobile-menu-content {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100%;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0;
+            overflow-y: auto;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .mobile-menu.active {
+            display: block;
+        }
+
+        .mobile-menu.active .mobile-menu-content {
+            right: 0;
+        }
+
+        .mobile-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.1px 10px 0.1px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-menu-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
             width: 40px;
             height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
-        
+
+        .mobile-menu-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 20px 25px;
+        }
+
+        .mobile-nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 16px 20px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(8px);
+        }
+
+        .mobile-user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 20px 25px;
+        }
+
+        .mobile-logout-link {
+            background: linear-gradient(135deg, #0080ffff 0%, #006effff 100%) !important;
+            margin-top: 10px;
+        }
+
         .container {
             max-width: 1400px;
             margin: 30px auto;
@@ -451,25 +628,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
         .status-success { color: #27ae60; font-weight: bold; }
         .status-error { color: #e74c3c; font-weight: bold; }
         
-        .btn-logout {
-            background: #e74c3c;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            text-decoration: none;
-            transition: background 0.3s;
-        }
-        
-        .btn-logout:hover {
-            background: #c0392b;
-        }
-        
         footer {
             background-color: #2c3e50;
             color: white;
             text-align: center;
             padding: 20px;
             margin-top: 40px;
+        }
+        
+        @media (max-width: 1200px) {
+            .nav-links, .user-info {
+                display: none;
+            }
+            .mobile-menu-btn {
+                display: block;
+            }
         }
         
         @media (max-width: 1024px) {
@@ -511,44 +684,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Itechlogo.png/738px-Itechlogo.png" alt="PSG iTech Logo" class="logo">
             <span class="nav-title">EEE Department</span>
         </div>
-        <div class="user-info">
-            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
-            <span><?php echo htmlspecialchars($currentUsername); ?></span>
-            <small style="font-size: 11px; opacity: 0.8;">(<?php echo htmlspecialchars($currentUserType); ?>)</small>
-            <a href="logout.php" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        
+        <div class="nav-content">
+            <div class="nav-links">
+                <a href="dashboard.php"><i class="fas fa-home"></i> HOME</a>
+                <a href="placement_experience.php"><i class="fas fa-book"></i> PLACED EXPERIENCE</a>
+                <a href="chatbot.php" style="background: #34495e;"><i class="fas fa-pencil-alt"></i> PREP WITH AI</a>
+                <?php if (in_array($currentUserType, ['admin', 'faculty'])): ?>
+                    <a href="admin_panel.php"><i class="fas fa-user-shield"></i> Admin Panel</a>
+                <?php endif; ?>
+                <a href="logout.php" style="background: #009dffff;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar"><?php echo $firstLetter; ?></div>
+                <span><?php echo htmlspecialchars($username); ?></span>
+                <small style="font-size: 11px; opacity: 0.8;">(<?php echo ucfirst($currentUserType); ?>)</small>
+            </div>
         </div>
+        
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
     </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-content">
+            <div class="mobile-menu-header">
+                <div class="mobile-user-info">
+                <div>
+                    <div style="font-weight: 700; font-size: 16px; color: white; margin-bottom: 2px;"><?php echo htmlspecialchars($username); ?>
+                    <div style="font-size: 13px; color: #bdc3c7; background: rgba(255, 255, 255, 0.1); padding: 1px 10px; border-radius: 20px; display: inline-block; font-weight: 500;"><?php echo ucfirst($currentUserType); ?></div></div>
+                </div>
+            </div>
+                <button class="mobile-menu-close" id="mobileMenuClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href="dashboard.php"><i class="fas fa-home"></i><span>HOME</span></a>
+                <a href="placement_experience.php"><i class="fas fa-book"></i><span>PLACED EXPERIENCE</span></a>
+                <a href="chatbot.php"><i class="fas fa-pencil-alt"></i><span>PREP WITH AI</span></a>
+                <?php if (in_array($currentUserType, ['admin', 'faculty'])): ?>
+                    <a href="admin_panel.php"><i class="fas fa-user-shield"></i><span>Admin Panel</span></a>
+                <?php endif; ?>
+                <a href="logout.php" class="mobile-logout-link"><i class="fas fa-sign-out-alt"></i><span>LOGOUT</span></a>
+            </div>
+        </div>
+    </div>
 
     <div class="container">
         <div class="page-header">
             <h1>🎓 EEE Placement AI Assistant</h1>
-            <span class="ai-badge">Powered by Gemini AI</span>
         </div>
         
         <div class="app-container">
             <div class="sidebar">
-                <h3>🚀 Quick Questions</h3>
-                <div class="examples-grid">
-                    <button class="example-btn" onclick="sendExample('Which students got the highest packages and why?')">
-                        🏆 Top Packages Analysis
-                    </button>
-                    <button class="example-btn" onclick="sendExample('What should I study to get placed in Google?')">
-                        🎯 Google Preparation
-                    </button>
-                    <button class="example-btn" onclick="sendExample('Analyze placement trends for EEE students')">
-                        📈 Trends Analysis
-                    </button>
-                    <button class="example-btn" onclick="sendExample('Compare packages between dream and super dream companies')">
-                        ⚖️ Company Comparison
-                    </button>
-                    <button class="example-btn" onclick="sendExample('What are the most common technical rounds?')">
-                        🔄 Interview Rounds
-                    </button>
-                    <button class="example-btn" onclick="sendExample('Create a 6-month placement preparation plan')">
-                        📅 Study Plan
-                    </button>
+                <div id="interview-prep-sidebar">
+                    <h3 style="color: #2c3e50; margin-bottom: 15px;">🎯 Interview Prep</h3>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #ecf0f1; margin-bottom: 20px;">
+                        <h4 style="color: #2c3e50; margin-bottom: 15px;">🏢 Select Company</h4>
+                        <div id="company-list" style="margin-top: 15px; overflow-y: auto; max-height: 250px;">
+                            <div class="ai-thinking">
+                                <span class="ai-dots"><span></span><span></span><span></span></span>
+                                Loading...
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
+
                 <div class="system-status">
                     <h4>🔧 System Status</h4>
                     <div id="db-status" class="status-error">Checking...</div>
@@ -560,71 +766,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
             </div>
             
             <div class="main-content">
-                <div class="tab-navigation">
-                    <button class="tab-btn active" onclick="switchTab('chat', event)">💬 AI Chat</button>
-                    <button class="tab-btn" onclick="switchTab('interview', event)">🎯 Interview Prep</button>
-                </div>
-                
-                <div id="chat-tab" class="tab-content active">
-                    <div class="chat-container">
-                        <div class="chat-messages" id="chat-messages">
-                            <div class="message assistant">
-                                <strong>🤖 AI Assistant:</strong> Welcome! I'm your AI-powered placement assistant. I can analyze placement data, provide study guidance, and interview preparation. What would you like to know?
-                            </div>
-                        </div>
-                        
-                        <div class="chat-input">
-                            <input type="text" id="message-input" placeholder="Ask anything about placements..." onkeypress="handleKeyPress(event)">
-                            <button onclick="sendMessage()" id="send-btn">
-                                Send
-                            </button>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message assistant">
+                            <strong>🤖 AI Assistant:</strong> Welcome! I'm your AI-powered placement assistant. I can analyze placement data, provide study guidance, and interview preparation. What would you like to know?
                         </div>
                     </div>
-                </div>
-                
-                <div id="interview-tab" class="tab-content">
-                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; flex: 1;">
-                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #ecf0f1;">
-                            <h4 style="color: #2c3e50; margin-bottom: 15px;">🏢 Select Company</h4>
-                            <div id="company-list" style="margin-top: 15px; overflow-y: auto; max-height: 500px;">
-                                <div class="ai-thinking">
-                                    <span class="ai-dots"><span></span><span></span><span></span></span>
-                                    Loading...
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div style="background: white; padding: 20px; border-radius: 8px; border: 2px solid #ecf0f1; overflow-y: auto;">
-                            <h4 style="color: #2c3e50; margin-bottom: 15px;">🎯 Interview Preparation</h4>
-                            <div id="preparation-content">
-                                <p style="color: #7f8c8d;">Select a company to get AI-generated interview preparation guide.</p>
-                            </div>
-                        </div>
+                    
+                    <div class="chat-input">
+                        <input type="text" id="message-input" placeholder="Ask anything about placements..." onkeypress="handleKeyPress(event)">
+                        <button onclick="sendMessage()" id="send-btn">
+                            Send
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer>
-        <p>Department of EEE - PSG iTech © 2025</p>
-    </footer>
-
     <script>
-        let currentTab = 'chat';
-        
-        function switchTab(tabName, event) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(tabName + '-tab').classList.add('active');
-            event.target.classList.add('active');
-            currentTab = tabName;
-            
-            if (tabName === 'interview') {
-                loadCompanies();
-            }
-        }
-        
         function sendMessage() {
             const input = document.getElementById('message-input');
             const message = input.value.trim();
@@ -750,11 +910,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
         }
         
         function getInterviewPrep(companyName) {
-            const preparationContent = document.getElementById('preparation-content');
+            const userMessage = `Tell me about interview preparation for ${companyName}`;
+            addMessage(userMessage, 'user');
             
-            preparationContent.innerHTML = '<div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> Generating guide for ' + companyName + '</div>';
+            const thinkingId = addMessage(
+                `<div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> Generating guide for ${companyName}...</div>`, 
+                'assistant', 
+                true
+            );
             
-            // FIXED: Call chatbot.php
             fetch('chatbot.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -762,25 +926,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
             })
             .then(response => response.json())
             .then(data => {
+                const thinkingElem = document.getElementById(thinkingId);
+                if (thinkingElem) thinkingElem.remove();
+
                 if (data.success) {
-                    preparationContent.innerHTML = `
-                        <h3 style="color: #2c3e50; margin-bottom: 15px;">🎯 Preparation for ${companyName}</h3>
-                        <div style="white-space: pre-wrap; line-height: 1.6; background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                            ${data.response}
-                        </div>
-                    `;
+                    addMessage(data.response, 'assistant');
                 } else {
-                    preparationContent.innerHTML = '<div class="status-error">❌ ' + (data.error || 'Failed to generate guide') + '</div>';
+                    addMessage('❌ ' + (data.error || 'Failed to generate guide'), 'assistant');
                 }
             })
             .catch(error => {
-                preparationContent.innerHTML = '<div class="status-error">❌ Network error: ' + error.message + '</div>';
+                const thinkingElem = document.getElementById(thinkingId);
+                if (thinkingElem) thinkingElem.remove();
+                addMessage('❌ Network error: ' + error.message, 'assistant');
             });
         }
         
         // Test system on load
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu functionality
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mobileMenu.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+
+            if (mobileMenuClose) {
+                mobileMenuClose.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            }
+
+            if (mobileMenu) {
+                mobileMenu.addEventListener('click', function(e) {
+                    if (e.target === mobileMenu) {
+                        mobileMenu.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && mobileMenu && mobileMenu.classList.contains('active')) {
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+
             testSystem();
+            loadCompanies();
         });
     </script>
 </body>
