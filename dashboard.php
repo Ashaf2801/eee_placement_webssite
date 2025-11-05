@@ -770,6 +770,29 @@ $currentYear = date('Y');
             .resource-links {
                 grid-template-columns: 1fr;
             }
+
+            /* Smaller fonts for tree view on mobile */
+            .tree li .content {
+                font-size: 15px;
+                padding: 6px 10px;
+            }
+            .tree ul li .content {
+                font-size: 14px;
+            }
+            .tree ul ul li .content {
+                font-size: 13px;
+            }
+
+            /* Smaller fonts for the topic modal on mobile */
+            .topic-modal-header h2 {
+                font-size: 20px;
+            }
+            .topic-section h3 {
+                font-size: 20px;
+            }
+            .topic-description, .key-topics li {
+                font-size: 15px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1331,18 +1354,26 @@ $currentYear = date('Y');
 
             const topicContent = {
                 'PROTECTION SWITCH GEAR':{
-                    overview: '',
+                    overview: 'Protec on and Switchgear is a core subject focuses on the principles, design, and opera on of protec ve relays, circuit breakers, fuses, isolators, and switchgear assemblies used in power genera on, transmission, and distribu on systems. This subject is highly valuable for students aiming for careers in power u li es, electrical design industries, manufacturing units, and renewable energy sectors. The knowledge gained is applicable in companies such as Sobha construc on, Schneider Electric India, Siemens Energy Limited, Voltas Limited, Hitachi, ELGi Equipment Ltd, Saipem India Projects, Anora Instrumenta on.',
                     resources: [
-                        { title: '', link: '' }
+                        { title: '', link: 'https://drive.google.com/drive/folders/19ki7Sk_G4FJLsmhLRRcaabzgu_mSKp1R' },
+                        { title: '', link: 'https://drive.google.com/drive/folders/19ki7Sk_G4FJLsmhLRRcaabzgu_mSKp1R'}
                     ],
                     keyTopics: [
-                        ''
+                        'Types of faults – symmetrical and unsymmetrical faults, their effects on power systems',
+                        'Operating principle and types of circuit breakers (air, oil, SF6, vacuum)',
+                        'Working principle and types of protective relays (electromagnetic, static, numerical)',
+                        'Arc formation and methods of arc extinction and Fuse characteristic and selection criteria'
                     ],
                     videos: [
-                        { title: '', link: '' }
+                        { title: 'Protec on and Switchgear Engineering- Ekeeda', link: 'https://www.youtube.com/playlist?list=PLm_MSClsnwm_MGFxcos9bQ1BPujUF7YEx'},
+                        { title: 'Circuit Breakers explained- Electrical lectures', link: 'https://www.youtube.com/@electricallectures/playlists'}
+
                     ],
                     additionalResources: [
-                        {title: '', link: '', description: '' }
+                        {title: 'Protection and Switchgear Quiz – Electrical4U.', link: '', description: 'Helpful for first round technical MCQ ques ons.'},
+                        {title: 'Electrical4U – Power System Protection Tutorials', link: '', description: 'Easy-to-understand the concepts of P&S.'},
+                        {title: 'Top Technical Interview Questions – Protection and Switchgear', link: '', description: 'collection of commonly asked interview quesions with clear explanations on relays, circuit breakers, and fault protection'}
                     ]
                 },
                 'EMBEDDED SYSTEMS':{

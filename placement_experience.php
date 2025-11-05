@@ -166,16 +166,13 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             right: 0;
         }
 
-        .mobile-nav-links a:hover::before {
-            left: 100%;
-        }
-
         .mobile-nav-links a:hover {
             background: rgba(255, 255, 255, 0.1);
             transform: translateX(8px);
             border-color: rgba(255, 255, 255, 0.2);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
+
         .mobile-menu-header {
             display: flex;
             justify-content: space-between;
@@ -199,15 +196,13 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             align-items: center;
             justify-content: center;
         }
-        .mobile-logout-link:hover::before {
-            left: 100%;
-        }
 
         .mobile-logout-link:hover {
-            background: linear-gradient(135deg, #006effff 0%, #0055ccff 100%) !important;
+            background: linear-gradient(135deg, #006eff 0%, #0055cc 100%) !important;
             transform: translateX(8px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
+
         .mobile-nav-links {
             display: flex;
             flex-direction: column;
@@ -235,7 +230,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
         }
 
         .mobile-logout-link {
-            background: linear-gradient(135deg, #0080ffff 0%, #006effff 100%) !important;
+            background: linear-gradient(135deg, #0080ff 0%, #006eff 100%) !important;
             margin-top: 10px;
         }
 
@@ -288,6 +283,11 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             font-weight: 600;
         }
 
+        .batch-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
         .company-table-container {
             background: white;
             border-radius: 8px;
@@ -318,6 +318,11 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #2980b9;
         }
 
         table {
@@ -345,6 +350,22 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             color: #3498db;
             cursor: pointer;
             font-weight: 600;
+            text-decoration: none;
+        }
+
+        .company-name:hover {
+            text-decoration: underline;
+        }
+
+        .student-name-link {
+            color: #3498db;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .student-name-link:hover {
+            text-decoration: underline;
         }
 
         .student-table-container {
@@ -368,6 +389,11 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             font-size: 12px;
             cursor: pointer;
             border: none;
+            transition: background 0.3s ease;
+        }
+
+        .experience-link:hover {
+            background: #c0392b;
         }
 
         .delete-btn {
@@ -379,6 +405,11 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             cursor: pointer;
             border: none;
             margin-left: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
         }
 
         .confirm-modal {
@@ -412,6 +443,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             display: flex;
             justify-content: center;
             gap: 15px;
+            margin-top: 20px;
         }
 
         .confirm-btn-cancel,
@@ -422,6 +454,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
 
         .confirm-btn-cancel {
@@ -429,9 +462,17 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             color: white;
         }
 
+        .confirm-btn-cancel:hover {
+            background: #7f8c8d;
+        }
+
         .confirm-btn-delete {
             background: #e74c3c;
             color: white;
+        }
+
+        .confirm-btn-delete:hover {
+            background: #c0392b;
         }
 
         .modal {
@@ -465,6 +506,11 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             font-weight: bold;
             cursor: pointer;
             color: #aaa;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: #333;
         }
 
         .modal-header {
@@ -517,6 +563,12 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             border-radius: 8px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .add-experience-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
         }
 
         .add-experience-modal {
@@ -551,6 +603,11 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             font-weight: bold;
             cursor: pointer;
             color: #aaa;
+            transition: color 0.3s ease;
+        }
+
+        .add-experience-modal-close:hover {
+            color: #333;
         }
 
         .form-header {
@@ -590,9 +647,28 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             border-radius: 6px;
             font-size: 14px;
             font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            border-color: #3498db;
+            outline: none;
         }
 
         .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .round-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
             resize: vertical;
             min-height: 150px;
         }
@@ -606,6 +682,11 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             font-size: 12px;
             cursor: pointer;
             margin-top: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .add-company-option:hover {
+            background: #c0392b;
         }
 
         .new-company-input {
@@ -676,6 +757,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
 
         .btn-cancel {
@@ -683,9 +765,17 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             color: white;
         }
 
+        .btn-cancel:hover {
+            background: #7f8c8d;
+        }
+
         .btn-submit {
             background: #27ae60;
             color: white;
+        }
+
+        .btn-submit:hover {
+            background: #219653;
         }
 
         .message {
@@ -732,6 +822,12 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             color: #7f8c8d;
         }
 
+        .action-cell {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
         @media (max-width: 1200px) {
             .nav-links {
                 display: none;
@@ -762,6 +858,78 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             .form-row {
                 grid-template-columns: 1fr;
             }
+
+            .page-header, .batch-container {
+                padding: 20px;
+            }
+
+            .table-header {
+                padding: 15px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .table-header h2 {
+                font-size: 18px;
+            }
+
+            th, td {
+                padding: 8px;
+                font-size: 13px;
+            }
+
+            .page-header h1 {
+                font-size: 24px;
+            }
+
+            .page-header p {
+                font-size: 16px;
+            }
+
+            .add-experience-btn {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+
+            .batch-card {
+                padding: 15px;
+                font-size: 16px;
+            }
+
+            .add-experience-modal-content, .modal-content {
+                padding: 20px;
+                width: 95%;
+                margin: 5% auto;
+            }
+
+            #companyTableContent, #studentTableContent {
+                overflow-x: auto;
+            }
+
+            .action-cell {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .action-cell .experience-link, .action-cell .delete-btn {
+                width: 100%;
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .modal-header h2 {
+                font-size: 20px;
+            }
+
+            .round-title {
+                font-size: 16px;
+            }
+
+            .round-content {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -780,7 +948,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                 <?php if (in_array($currentUserType, ['admin', 'faculty'])): ?>
                     <a href="admin_panel.php"><i class="fas fa-user-shield"></i> Admin Panel</a>
                 <?php endif; ?>
-                <a href="logout.php" style="background: #009dffff;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
+                <a href="logout.php" style="background: #009dff;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
             </div>
             
             <div class="user-info">
@@ -1455,7 +1623,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                                         <th>Company Name</th>
                                         <th>Students Placed</th>
                                         <th>Avg Package (LPA)</th>
-                                        <th>Max Package (LPA)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1468,7 +1635,6 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                                     <td><span class="company-name" onclick="loadStudents('${company.company_name}')">${company.company_name}</span></td>
                                     <td>${company.student_count}</td>
                                     <td>${parseFloat(company.avg_package).toFixed(2)}</td>
-                                    <td>${parseFloat(company.max_package).toFixed(2)}</td>
                                 </tr>
                             `;
                         });
@@ -1502,11 +1668,9 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                                     <tr>
                                         <th>S.No</th>
                                         <th>Name</th>
-                                        <th>Register No</th>
                                         <th>Phone</th>
                                         <th>Email</th>
                                         <th>Package (LPA)</th>
-                                        <th>Experience</th>
                                         ${canEdit ? '<th>Actions</th>' : ''}
                                     </tr>
                                 </thead>
@@ -1515,21 +1679,18 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                         
                         data.students.forEach((student, index) => {
                             const actionButtons = canEdit ? 
-                                `<td>
-                                    <button class="experience-link" style="background: #f39c12;" onclick="editExperience('${student.register_no}', '${currentCompany}')">Edit</button>
+                                `<td class="action-cell">
+                                    <button class="experience-link" style="background: #f39c12; margin-right: 5px;" onclick="editExperience('${student.register_no}', '${currentCompany}')">Edit</button>
                                     <button class="delete-btn" onclick="deleteExperience('${student.register_no}', '${currentCompany}', '${student.name}')"><i class="fas fa-trash"></i> Delete</button>
-                                </td>` : 
-                                '';
+                                </td>` : '';
                             
                             tableHTML += `
                                 <tr>
                                     <td>${index + 1}</td>
-                                    <td>${student.name}</td>
-                                    <td>${student.register_no}</td>
+                                    <td><span class="student-name-link" onclick="showExperience('${student.register_no}', '${student.name}', '${currentCompany}')">${student.name}</span></td>
                                     <td>${student.phone_no || 'N/A'}</td>
                                     <td>${student.mail || 'N/A'}</td>
                                     <td>${parseFloat(student.package).toFixed(2)}</td>
-                                    <td><button class="experience-link" onclick="showExperience('${student.register_no}', '${student.name}', '${currentCompany}')">View Experience</button></td>
                                     ${actionButtons}
                                 </tr>
                             `;
@@ -1670,7 +1831,20 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
             if (event.target === confirmModal) {
                 confirmModal.style.display = 'none';
             }
+            
+            const addExperienceModal = document.getElementById('addExperienceModal');
+            if (event.target === addExperienceModal) {
+                closeAddExperienceModal();
+            }
         }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+                closeConfirmModal();
+                closeAddExperienceModal();
+            }
+        });
     </script>
 </body>
 </html>

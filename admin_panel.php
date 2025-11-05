@@ -662,10 +662,6 @@ $currentYear = date('Y');
     <!-- Main Content -->
     <div class="container">
         <!-- Page Header -->
-        <div class="page-header">
-            <h1><i class="fas fa-user-shield"></i> Admin Control Panel</h1>
-            <p>Manage users and placement details</p>
-        </div>
 
         <!-- Placement Details Section -->
         <div class="section-card">

@@ -5,6 +5,7 @@ Handles API calls from PHP frontend via headers
 
 from flask import Flask, request, jsonify, session
 from flask_cors import CORS
+from waitress import serve
 from flask_session import Session
 import os
 import sys
@@ -399,4 +400,5 @@ if __name__ == '__main__':
         logger.warning("DB pool failed!")
 
     logger.info("Starting Flask AI Server on 0.0.0.0:5001")
-    app.run(host='0.0.0.0', port=5001, debug=False, threaded=True)
+    # Use Waitress, a production-ready WSGI server
+    serve(app, host='0.0.0.0', port=5001, threads=8)

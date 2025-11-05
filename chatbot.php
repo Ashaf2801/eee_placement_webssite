@@ -649,23 +649,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
             .app-container {
                 grid-template-columns: 1fr;
             }
-            
+
             .sidebar {
-                order: 2;
+                order: 1; /* Show sidebar first on mobile */
             }
             
             .main-content {
-                order: 1;
+                order: 2; /* Show main content after sidebar */
             }
         }
         
         @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 26px;
+            }
+
+            .sidebar h3 {
+                font-size: 18px;
+            }
+
+            .example-btn {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+
+            .chat-input input {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+
+            .chat-input button {
+                padding: 12px 20px;
+            }
+
             .chat-messages {
                 max-height: 400px;
             }
             
             .message {
                 max-width: 90%;
+                font-size: 14px;
+                padding: 12px 15px;
             }
             
             .chat-input {
@@ -768,9 +792,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
             <div class="main-content">
                 <div class="chat-container">
                     <div class="chat-messages" id="chat-messages">
-                        <div class="message assistant">
-                            <strong>🤖 AI Assistant:</strong> Welcome! I'm your AI-powered placement assistant. I can analyze placement data, provide study guidance, and interview preparation. What would you like to know?
-                        </div>
+                        <div class="message assistant">Welcome! I'm your AI-powered placement assistant. I can analyze placement data, provide study guidance, and interview preparation. What would you like to know?</div>
                     </div>
                     
                     <div class="chat-input">
@@ -912,6 +934,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
         function getInterviewPrep(companyName) {
             const userMessage = `Tell me about interview preparation for ${companyName}`;
             addMessage(userMessage, 'user');
+
+            // On mobile, scroll to the chat section after clicking a company
+            if (window.innerWidth <= 1024) {
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) {
+                    mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
             
             const thinkingId = addMessage(
                 `<div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> Generating guide for ${companyName}...</div>`, 

@@ -1,18 +1,38 @@
 <?php
 session_start();
 
-// Database Configuration - UPDATE WITH YOUR MYSQL CREDENTIALS
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');                 // Change to your MySQL username
-define('DB_PASS', '');                     // Change to your MySQL password
-define('DB_NAME', 'eee_placement');     // Change to your database name
-define('DB_CHARSET', 'utf8mb4');
+/**
+ * Loads environment variables from a .env file.
+ * @param string $path The path to the .env file.
+ */
+function loadEnv($path) {
+    if (!file_exists($path)) {
+        throw new Exception("The .env file does not exist at path: {$path}");
+    }
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) {
+            continue;
+        }
+        list($name, $value) = explode('=', $line, 2);
+        $name = trim($name);
+        $value = trim($value);
+        if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
+            putenv(sprintf('%s=%s', $name, $value));
+            $_ENV[$name] = $value;
+            $_SERVER[$name] = $value;
+        }
+    }
+}
+
+// Load the .env file from the project root
+loadEnv(__DIR__ . '/.env');
 
 // Create database connection for MySQL
 function getDBConnection() {
     try {
-        $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
-        $pdo = new PDO($dsn, DB_USER, DB_PASS);
+        $dsn = "mysql:host=" . getenv('MYSQL_HOST') . ";dbname=" . getenv('MYSQL_DATABASE') . ";charset=utf8mb4";
+        $pdo = new PDO($dsn, getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'));
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         return $pdo;
