@@ -1356,8 +1356,8 @@ $currentYear = date('Y');
                 'PROTECTION SWITCH GEAR':{
                     overview: 'Protec on and Switchgear is a core subject focuses on the principles, design, and opera on of protec ve relays, circuit breakers, fuses, isolators, and switchgear assemblies used in power genera on, transmission, and distribu on systems. This subject is highly valuable for students aiming for careers in power u li es, electrical design industries, manufacturing units, and renewable energy sectors. The knowledge gained is applicable in companies such as Sobha construc on, Schneider Electric India, Siemens Energy Limited, Voltas Limited, Hitachi, ELGi Equipment Ltd, Saipem India Projects, Anora Instrumenta on.',
                     resources: [
-                        { title: '', link: 'https://drive.google.com/drive/folders/19ki7Sk_G4FJLsmhLRRcaabzgu_mSKp1R' },
-                        { title: '', link: 'https://drive.google.com/drive/folders/19ki7Sk_G4FJLsmhLRRcaabzgu_mSKp1R'}
+                        { title: 'Principles of Power System by V.K. Mehta', link: 'https://drive.google.com/drive/folders/1xoLbthyw-jzbBpJOyq_rP0HnFO3nvI0_' },
+                        { title: 'Protection and Switchgear - Bakshi ', link: 'https://drive.google.com/drive/folders/1i_FY9Cx2sZFpuIBCHfL3IRrrHKGV_tlV'}
                     ],
                     keyTopics: [
                         'Types of faults – symmetrical and unsymmetrical faults, their effects on power systems',
@@ -1392,18 +1392,19 @@ $currentYear = date('Y');
                     ]
                 },
                 'PLC':{
-                    overview: '',
+                    overview: 'Programmable Logic Controller is one of the most essenensial subjects in Electrical, Electronics, and  Instrumentation Engineering. It focuses on the automation and control of industrial processes using programmable controllers instead of conventional relay-based systems. Students learn how to design, program, and troubleshoot automated systems that control motors, conveyors, robotic arms, and production lines. The subject covers ladder logic, input/output modules, sensors, actuators, timers, and counters, which are crucial for modern industrial automation. The knowledge gained is applicable in companies such as Schneider Electric India, Asian Paints, Hitachi, Voltas Limited (A Tata Enterprise), ELGi Equipments Ltd, Siemens Energy Limited, Saipem India Projects Pvt. Ltd, Caterpillar, Anora Instrumenta on Pvt. Ltd. ',
                     resources: [
-                        { title: '', link: '' }
+                        { title: 'Programmable logic controllers - frank petruzella', link: 'https://drive.google.com/drive/folders/1EPxNLyUE5Pqhl3XNvr6rbuRdsdb7yaEe' }
                     ],
                     keyTopics: [
                         ''
                     ],
                     videos: [
-                        { title: '', link: '' }
+                        { title: 'Introduction to PLC | Siemens PLC Training Course', link: 'https://www.youtube.com/watch?v=jzy0so3h_kc' }
                     ],
                     additionalResources: [
-                        {title: '', link: '', description: '' }
+                        {title: 'Important PLC Interview Questions and Answers ', link: 'https://dipslab.com/plc-interview-questions-answers/', description: '' },
+                        {title: 'Top 100 PLC Interview Questions and Answers', link: 'https://www.ambitionbox.com/skills/plc-interview-questions', description: ''}
                     ]
                 },
                 'DIGITAL SIGNAL PROCESSING':{
@@ -1424,7 +1425,7 @@ $currentYear = date('Y');
                 'POWER SYSTEM':{
                     overview: 'Power Systems is the backbone of electrical engineering, focusing on the generation, transmission, distribution, and control of electric power. It integrates concepts from electrical machines, power electronics, and control systems to ensure reliable, efficient, and stable power delivery. The subject covers power generation from conventional and renewable sources, economic dispatch, transmission line performance, system protection, load flow studies, fault analysis, stability, and compensation techniques. Understanding how power is generated, transmitted, and maintained under various operating and fault conditions is essential for power sector roles, grid operation, and utility based placements.',
                     resources: [
-                        { title: 'Power System - S.Lavanya', link: 'https://drive.google.com/drive/folders/1nRqgZmGGdp8ZdvHVX0rwzWwizhaaPDD7' }
+                        { title: 'Principles of Power System - V K Mehta', link: 'https://drive.google.com/drive/folders/1tFu4WGV8vjxKUCycnHEmlEh92aS5jcOu' }
                     ],
                     keyTopics: [
                         'Power Generation and Transmission: Know the basics of conventional and non-conventional generation, economic load dispatch, and HVDC/AC transmission with their parameters, losses, and efficiency considerations.',
@@ -1437,6 +1438,7 @@ $currentYear = date('Y');
                         { title: 'Power System - Lectures in Electrical Engineering', link: 'https://www.youtube.com/playlist?list=PL_mruqjnuVd9eT-Lmjdbr0UQVcooVy-tU'}
                     ],
                     additionalResources: [
+                        {title: 'ETAB Software', link: 'https://drive.google.com/drive/folders/1JUGw4M1hQU5b9BxzZokTT3y6eQ2oI8wT', description: '' },
                         {title: 'Electrical Power System', link: 'https://www.electrical4u.com/power-system/', description: 'Electrical4U' },
                         {title: 'Power System Interview Questions', link: 'https://forumelectrical.com/power-system-interview-questions/', description: 'ForumElectrical.Com'},  
                         {title: 'Interview Preparation', link: 'https://www.withoutbook.com/InterviewQuestionList.php?tech=122&dl=Top&s=Power%20System%20Interview%20Questions%20and%20Answers', description: 'Without Book'}  
@@ -1445,7 +1447,7 @@ $currentYear = date('Y');
                 'POWER ELECTRONICS':{
                     overview: 'Power Electronics deals with the conversion, control, and conditioning of electric power using semiconductor devices. It bridges electrical machines and electronic control, enabling efficient energy conversion in modern systems such as motor drives, converters, and renewable energy applications. The subject focuses on power semiconductor devices like SCR, MOSFET, and IGBT, their switching characteristics, and gate control methods. It also covers converter types - DC-DC (buck, boost, buck-boost), AC-DC (rectifiers), and AC-AC (inverters and choppers) - along with modulation techniques, harmonic analysis, and applications in speed control, voltage regulation, and industrial automation.',
                     resources: [
-                        { title: 'Power Electronics - Dr. A. Geetha ', link: 'https://drive.google.com/drive/folders/1wcv_0nMWaIBS_gjK-rSI_KRDmIWNSq8W' }
+                        { title: 'Power Electronics - Bhimbhra', link: 'https://drive.google.com/drive/folders/1UG_bvIjiMBtYjvzhtYV4QZB8IqVupjFj' }
                     ],
                     keyTopics: [
                         'Device Knowledge: Understand the characteristics, triggering, and switching behavior of SCR, MOSFET, and IGBT - the core components in converters and drives.',
@@ -1467,8 +1469,9 @@ $currentYear = date('Y');
                 'ELECTRICAL MACHINES':{
                     overview: 'Electrical Machines form the foundation of power conversion systems, covering the principles, construction, performance, and control of transformers, DC machines, induction motors, and synchronous machines. The subject explains how electrical energy is converted to mechanical energy (and vice versa) through electromagnetic induction. It includes detailed study of transformers for power transfer, DC machines for variable speed and torque control, induction motors for industrial drives, and synchronous machines for power generation and factor correction. Understanding machine characteristics, equivalent circuits, testing methods, losses, and efficiency is crucial for design, operation, and maintenance in power and industrial systems.',
                     resources: [
-                        { title: 'ELECTRICAL MACHINES-I', link: 'https://mrcet.com/downloads/digital_notes/EEE/EM-I%20DIGITAL%20NOTES%20LATEST-EEE.pdf' },
-                        { title: 'Fundamentals of Electric Circuits by Charles Alexander Matthew Sadiku', link: 'https://www.eeekenya.com/wp-content/uploads/2016/04/Electrical-Interview-Questions-Answers.pdf'}
+                        { title: 'ELECTRICAL MACHINES-I - Bhakshi', link: 'https://drive.google.com/drive/folders/13HH3MQTIS1jx3ocl3bk__Z_mxSWpi_CM' },
+                        { title: 'ELECTRICAL MACHINES-II - Bhakshi', link: 'https://drive.google.com/drive/folders/1Ab2AvVNSji6_ezLmpi7dqrQsupAzwYrE'},
+                        { title: 'Electrical Interview Question - Answer', link: 'https://drive.google.com/drive/folders/1zgL5CFeOtXBz_sncbGsAIU2ENjSg3W92'}
                     ],
                     keyTopics: [
                         'Core Understanding: Know the working principles, EMF equations, and construction details of transformers, DC, induction, and synchronous machines.',
@@ -1490,8 +1493,8 @@ $currentYear = date('Y');
                 'ELECTRIC CIRCUIT ANALYSIS':{
                     overview: 'Electric Circuit Analysis is a fundamental subject in electrical engineering that deals with the study of electrical circuits and their behavior. It covers various concepts such as Ohm\'s Law, Kirchhoff\'s Laws, network theorems, transient and steady-state analysis, and AC/DC circuit analysis. Understanding these concepts is crucial for designing and analyzing electrical systems.',
                     resources: [
-                        { title: 'CIRCUIT THEORY by Nagoor kani', link: 'https://file.notion.so/f/f/68f8d12e-69fe-4008-999d-24754e9df119/0205bf81-804d-4e23-9699-3488627a26d2/Circuit_Theory_(A._Nagoor_Kani)_(Z-Library).pdf?table=block&id=83d1ba43-00c3-42a1-a6ba-3e915b4a299a&spaceId=68f8d12e-69fe-4008-999d-24754e9df119&expirationTimestamp=1759687200000&signature=i5fL8uWspsnUwBe6-XTpYdx69ZlCMD1Z1Hm4w3CmAmY&downloadName=Circuit+Theory+%28A.+Nagoor+Kani%29+%28Z-Library%29.pdf' },
-                        { title: 'Fundamentals of Electric Circuits by Charles Alexander Matthew Sadiku', link: 'https://file.notion.so/f/f/68f8d12e-69fe-4008-999d-24754e9df119/2af659d5-9606-4b8d-be70-d56cd649b3b4/Fundamentals_of_Electric_Circuits_(7th_Ed.)_International_Student_Edition)_(Charles_K._Alexander_Matthew_Sadiku)_(Z-Library).pdf?table=block&id=bc8aeb96-de07-48f8-aeed-10af1e1090bf&spaceId=68f8d12e-69fe-4008-999d-24754e9df119&expirationTimestamp=1759687200000&signature=0mZyhdPfHjA63V0fsHbQm9WKezSAb8pXUjE2bGybhPY&downloadName=Fundamentals+of+Electric+Circuits+%287th+Ed.%29+International+Student+Edition%29+%28Charles+K.+Alexander%2C+Matthew+Sadiku%29+%28Z-Library%29.pdf'}
+                        { title: 'CIRCUIT THEORY by Nagoor kani', link: 'https://drive.google.com/drive/folders/1seIKBMPNcri2GK5WYv9Nwt4z81cCOqvb' },
+                        { title: 'Fundamentals of Electric Circuits by Charles Alexander Matthew Sadiku', link: 'https://drive.google.com/drive/folders/1e40IHOlnd74x2aA96AGYtZ4MZaYpP7Aj'}
                     ],
                     keyTopics: [
                         'Focus on understanding circuit theorems like Thevenin\'s and Norton\'s theorems.',
@@ -1509,7 +1512,8 @@ $currentYear = date('Y');
                 'CONTROL SYSTEM': {
                     overview: 'Control Systems is a crucial subject in electrical engineering that focuses on the behavior of dynamic systems and how to control them effectively. It covers topics such as feedback systems, stability analysis, time and frequency domain analysis, and controller design. Understanding control systems is essential for various applications in automation, robotics, and industrial processes.',
                     resources: [
-                        { title: 'HandWritten Notes', link: 'https://file.notion.so/f/f/68f8d12e-69fe-4008-999d-24754e9df119/13236107-11fc-4cc0-9172-e4ec9ad439f5/CONTROL_SYSTEM_HANDWRITTEN.pdf?table=block&id=c56fece6-8429-4b49-9902-bdb7ab5c93f4&spaceId=68f8d12e-69fe-4008-999d-24754e9df119&expirationTimestamp=1759687200000&signature=5IPyRIIsgxOOSKtd4R0T_UzEm8YtMmCV3FWwX6JKC1E&downloadName=CONTROL_SYSTEM_HANDWRITTEN.pdf' }
+                        { title: 'Control Systems - Bhakshi', link: 'https://drive.google.com/drive/folders/1f8pgfswEkcihaS8zu1SrsbKiS9W2W3aT'},
+                        { title: 'HandWritten Notes', link: 'https://drive.google.com/drive/folders/1I1Heudugwiw2INTQFbnJu84t84otyIZr' }
                     ],
                     keyTopics: [
                         'Practice control system problems, as they are commonly asked in the first round of core company interviews.',
@@ -1523,7 +1527,8 @@ $currentYear = date('Y');
                 'LINEAR INTEGRATED CIRCUITS': {
                     overview: 'Linear Integrated Circuits (ICs) are essential components in analog electronics, used in various applications such as amplification, filtering, and signal processing. This subject covers the principles of operation, characteristics, and applications of different types of linear ICs, including operational amplifiers, comparators, and voltage regulators.',
                     resources: [
-                        { title: 'Linear Integrated Circuits by Roy Choudhury', link: 'https://file.notion.so/f/f/68f8d12e-69fe-4008-999d-24754e9df119/8079f3e7-42e7-4f7f-9dc8-e1209da15456/linear_integrated_circuit_applications_(Roy_Choudhary)_(Z-Library).pdf?table=block&id=5e4b0fe8-6adb-4386-904f-2b6c65a22c51&spaceId=68f8d12e-69fe-4008-999d-24754e9df119&expirationTimestamp=1759694400000&signature=6uNtO_IE1f-Bsl8JU6vWJ2dgvCX4WKyDeAgoJ1Dbj2k&downloadName=linear+integrated+circuit+applications+%28Roy+Choudhary%29+%28Z-Library%29.pdf'}
+                        { title: 'Linear Integrated Circuits - Roy Choudhury', link: 'https://drive.google.com/drive/folders/1rxrcNfTw8HIjqlH4dIctrud5Lejl2VNM'},
+                        { title: 'Linear Integrated Circuits - Bhakshi', link: 'https://drive.google.com/drive/folders/1qFs3W2p3OsVxEBu_eRWOL7922EpLPGba' }
                     ],
                     keyTopics: [
                         'Focus on understanding the working principles of operational amplifiers and their applications.',
@@ -1536,10 +1541,10 @@ $currentYear = date('Y');
                         { title: 'Operational Amplifiers - Practice Paper', link: 'https://practicepaper.in/gate-ee/operational-amplifiers', description: 'Practice GATE question will make easy for craking first round' },
                     ]
                 },
-                'ELECTRON DEVICES AND CIRCUITS': {
+                'ELECTRONIC DEVICES AND CIRCUITS': {
                     overview: 'Electron Devices and Circuits is a fundamental subject in electrical engineering that focuses on the study of semiconductor devices and their applications in electronic circuits. It covers topics such as diodes, transistors, and their configurations, as well as various electronic circuits used in amplifiers, oscillators, and switching applications.',
                     resources: [
-                        { title: 'Electronic Devices and Circuits by David A. Bell', link: 'https://file.notion.so/f/f/68f8d12e-69fe-4008-999d-24754e9df119/6be9ecd1-250f-485a-b8d2-a775ac29dddf/Electronic_Devices_and_Circuit_Theory_(11th_Edition)_(Robert_L._Boylestad_Louis_Nashelsky)_(Z-Library).pdf?table=block&id=63e45f21-d68e-4236-ad88-85bd22dcbe37&spaceId=68f8d12e-69fe-4008-999d-24754e9df119&expirationTimestamp=1759694400000&signature=C1Wt3zhoka0Ms0re_oxgwopErK0LF74qx_1pabfO_qU&downloadName=Electronic+Devices+and+Circuit+Theory+%2811th+Edition%29+%28Robert+L.+Boylestad%2C+Louis+Nashelsky%29+%28Z-Library%29.pdf'}                   
+                        { title: 'Electronic Devices and Circuits - Robert L. Boylestad Louis Nashelsky', link: 'https://drive.google.com/drive/folders/1VazJJeWaj-mO3tK_yZKG5AxN4RfXQObt'}                   
                     ],
                     keyTopics: [
                         'Unacademy Lectures and ALL ABOUT ELECTRONICS are recommended to use a primary source for learning analog electronics and use other resources as your supplement to aid your understanding.',
@@ -1558,7 +1563,8 @@ $currentYear = date('Y');
                 'DIGITAL ELECTRONICS': {
                     overview: 'Digital Electronics is a fundamental subject that forms the basis for understanding modern electronic systems. It covers topics such as logic gates, flip-flops, multiplexers, and digital circuits, which are essential for various applications in electronics and computer engineering.',
                     resources: [
-                        { title: 'Digital Logic and Computer Design by MORRIS MANO', link: 'https://file.notion.so/f/f/68f8d12e-69fe-4008-999d-24754e9df119/748521e6-f447-4168-92ce-9fb3f24feec2/Digital_Logic_and_Computer_Design._(M._Morris_Mano.)_(Z-Library).pdf?table=block&id=ce76cf98-141f-4a0b-b854-ccca02c94487&spaceId=68f8d12e-69fe-4008-999d-24754e9df119&expirationTimestamp=1759680000000&signature=B5QnTPc-O2mnYOBVVJDL7CMoB9cIjSf3WciyZQSCkGU&downloadName=Digital+Logic+and+Computer+Design.+%28M.+Morris+Mano.%29+%28Z-Library%29.pdf' }
+                        { title: 'Digital Logic and Computer Design by MORRIS MANO', link: 'https://drive.google.com/drive/folders/193-3AoPferXCECeU7sZ4K3gfxGaWKu2Q' },
+                        { title: 'Digital Electronics - Bhakshi', link: 'https://drive.google.com/drive/folders/1XvkhiIDzNwj4YoGdoP2GsnP3Hb410kDj'}
                     ],
                     keyTopics: [
                         'Focus on understanding the working of different logic gates and their applications.',
@@ -1596,8 +1602,8 @@ $currentYear = date('Y');
                 'VLSI': {
                     overview: 'VLSI (Very Large Scale Integration) is a technology that allows the integration of thousands to millions of transistors on a single chip. It is a crucial subject in electrical engineering that focuses on the design and fabrication of integrated circuits (ICs) used in various electronic devices.',
                     resources: [
-                        { title: 'VLSI Design Complete Road map', link: 'https://file.notion.so/f/f/68f8d12e-69fe-4008-999d-24754e9df119/b3f163b2-081f-410b-b4a3-dee22bb91618/digital_roadmap.pdf?table=block&id=fc7e5f15-88b9-414a-9849-e67172aa210c&spaceId=68f8d12e-69fe-4008-999d-24754e9df119&expirationTimestamp=1759694400000&signature=9dFqT9QKSxfIJeJA3b2jhm1pCfAFwfOUW--lBuGpo78&downloadName=digital+roadmap.pdf'},
-                        { title: 'Handwritten notes', link: 'https://file.notion.so/f/f/68f8d12e-69fe-4008-999d-24754e9df119/bbc7776f-f663-4a46-a6fa-f200ec80fbe0/New_Doc_01-07-2023_21.47.pdf?table=block&id=74e5f7e4-9921-4e0f-82b4-31f0f6c8fea0&spaceId=68f8d12e-69fe-4008-999d-24754e9df119&expirationTimestamp=1759701600000&signature=MdoocCqt6B5GxwKP5lnDasfEkJtIzCikTfdwPNjec48&downloadName=New+Doc+01-07-2023+21.47.pdf'}
+                        { title: 'VLSI Design Complete Road map', link: 'https://drive.google.com/drive/folders/1y9UyraKfW_B-1-Cw4X1qL37510niU3ar'},
+                        { title: 'Handwritten notes', link: 'https://drive.google.com/drive/folders/1iWWhN3HIFqR6ohnY5rg1SQ3Rokxmz480'}
                     ],
                     keyTopics: [
                         'DIGITAL IC DESIGN BY DR.JANAKIRAMAN(NPTEL)',
@@ -1630,8 +1636,8 @@ $currentYear = date('Y');
                 'MICROPROCESSOR AND MICROCONTROLLER': {
                     overview: 'Microprocessors and Microcontrollers are essential components in embedded systems and digital electronics. A microprocessor is a general-purpose system that executes instructions, while a microcontroller is a compact integrated circuit designed to govern specific operations in embedded applications. Understanding both is crucial for designing and implementing electronic systems.',
                     resources: [
-                        { title: 'Microprocessor (8085) And its Applications by Nagoor kani', link: 'https://file.notion.so/f/f/68f8d12e-69fe-4008-999d-24754e9df119/82941c7a-1efd-456a-a51f-8ced5fa9cd42/Microprocessor_(8085)_And_its_Applications_(A._Nagoor_Kani)_(Z-Library).pdf?table=block&id=9879857b-e244-4f5c-8031-7d1dc973f3ae&spaceId=68f8d12e-69fe-4008-999d-24754e9df119&expirationTimestamp=1759687200000&signature=sBL_m-9SRBF3DJ9SnkqILVMHA9Q9bYwUM5B57zxG9mg&downloadName=Microprocessor+%288085%29+And+its+Applications+%28A.+Nagoor+Kani%29+%28Z-Library%29.pdf' },
-                        { title: 'The 8051 Microcontroller and Embedded Systems by Muhammad Ali Mazidi', link: 'https://file.notion.so/f/f/68f8d12e-69fe-4008-999d-24754e9df119/09d2c228-61cb-44b0-8028-bfd090c97c4c/The_8051_Microcontroller_and_Embedded_Systems_(Muhammad_Ali_Mazidi_Janice_G._Mazidi_etc.)_(Z-Library).pdf?table=block&id=44903dd5-0379-424b-9318-1f19c5fbd8f8&spaceId=68f8d12e-69fe-4008-999d-24754e9df119&expirationTimestamp=1759687200000&signature=xoMQd0mwzN-P3-T_wv66nbJXCoENpJjcKiM2Ndlpdgg&downloadName=The+8051+Microcontroller+and+Embedded+Systems+%28Muhammad+Ali+Mazidi%2C+Janice+G.+Mazidi+etc.%29+%28Z-Library%29.pdf'}
+                        { title: 'Microprocessor (8085) And its Applications - Nagoor kani', link: 'https://drive.google.com/drive/folders/1CWLBdh6_ccp5LgNU156qt8TaeCDIUbht' },
+                        { title: 'The 8051 Microcontroller and Embedded Systems - Muhammad Ali Mazidi', link: 'https://drive.google.com/drive/folders/1TVwKv0inqmYF9QFvLKsJD2oAy_CtfdTa'}
                     ],
                     keyTopics: [
                         'Focus on learning MPMC in class itself is sufficient to crack the interview'
@@ -1645,8 +1651,8 @@ $currentYear = date('Y');
                 'C': {
                     overview: 'C is a basic and important programming language that almost all companies, both core and IT, expect us to know. Our college offers a C programming course handled by Karthik and his team, and our seniors have mentioned that it is very useful.',
                     resources: [
-                        { title: 'C Programming Notes', link: './asset/C_BYTS_HANDWRITTEN.pdf' },
-                        { title: 'C BYTS class screenshots', link: './asset/C_programming_Complete_Notes_(1).pdf' },
+                        { title: 'C Programming Notes', link: 'https://drive.google.com/drive/folders/1fDzM5-5I7KSEmcLge8g8kRVBWZHEltV-' },
+                        { title: 'C BYTS class screenshots', link: 'https://drive.google.com/drive/folders/1xFqM34_Nmh1zDuVTCQnR6CwPyAEi0LFI' },
                         { title: 'C Last minute notes ', link: 'https://ribbon-tapir-f60.notion.site/C-programming-BYTS-aed99916110546728e3647675167b273?pvs=4' }
                     ],
                     keyTopics: [
@@ -1663,7 +1669,8 @@ $currentYear = date('Y');
                 'C++': {
                     overview: 'C++ serves as a bridge between procedural and object-oriented programming. By learning C++, you can understand OOP concepts effectively, which are essential for mastering Data Structures and Algorithms (DSA) - a key area for placement preparation.',
                     resources: [
-                        { title: 'C++ Programming Notes', link: './asset/Cpp_BYTS_HANDWRITTEN.pdf' }
+                        { title: 'C++ Programming Notes', link: 'https://drive.google.com/drive/folders/1MZg1LY_o6H76EbgB6KRLQyNBrg6ciLjg' },
+                        { title: 'C++ BYTS class screenshots', link: 'https://drive.google.com/drive/folders/1zRdk11y-_cu6IrNxlbZX9nCl1l_HH_RU' }
                     ],
                     keyTopics: [
                         'Learn both the code and concepts of OOP thoroughly to build a strong programming foundation.',
@@ -1709,7 +1716,7 @@ $currentYear = date('Y');
                 'DATA STRUCTURES AND ALGORITHM': {
                     overview : 'Data Structures and Algorithms (DSA) form the backbone of problem-solving in programming and are crucial for placement interviews across both IT and core companies. Strong DSA skills enable candidates to solve coding problems efficiently, optimize solutions, and perform well in technical rounds. While IT companies focus on programming-based problem solving using arrays, linked lists, stacks, queues, trees, graphs, and algorithms like sorting and searching, core companies may also test logical thinking, optimization, and basic algorithmic knowledge relevant to their domain.',
                     resources : [
-                        { title: 'DSA Notes', link: './asset/DSA_BYTS_HANDWRITTEN.pdf' }
+                        { title: 'DSA Notes', link: 'https://drive.google.com/drive/folders/1C66y2iQhGbzFKdqlSllUVG-V6DHo_O3_' }
                     ],
                     keyTopics: [
                         'Practice coding problems regularly using the “Take U Forward” DSA datasheet, which provides a structured approach to mastering all key topics efficiently.',
@@ -1743,7 +1750,9 @@ $currentYear = date('Y');
                 },
                 'DATABASE MANAGEMENT SYSTEM': {
                     overview: 'Database Management Systems (DBMS) are essential for managing and organizing data in various applications. Understanding DBMS concepts is crucial for both IT and core placements, as many companies require knowledge of database design, SQL queries, and data manipulation.',
-                    resources: [],
+                    resources: [
+                        { title: 'DBMS Notes', link: 'https://www.notion.so/DBMS-12af8404adab80019415c7c304e708b3?source=copy_link' }
+                    ],
                     keyTopics: [
                         'SQL Practice: Focus on writing queries, joins, aggregations, and subqueries, as many IT interviews include SQL-based questions.',
                         'Core Concepts: Understand normalization, relationships, indexing, and transactions, which are commonly discussed in both technical and HR interviews.',
@@ -1897,7 +1906,7 @@ $currentYear = date('Y');
                         { title: 'HR Interview Questions - PrepInsta', link: 'https://prepinsta.com/cgi/interview-questions/hr-interview-questions/', description: '' }
                     ]
                 }
-
+                
 
                 // Add other topics here...
             };
