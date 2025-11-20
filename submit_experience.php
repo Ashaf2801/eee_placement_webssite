@@ -47,6 +47,7 @@ try {
     $editMode = isset($_POST['editMode']) && $_POST['editMode'] === 'true';
     $originalRegisterNo = sanitizeInput($_POST['originalRegisterNo'] ?? '');
     $originalCompanyName = sanitizeInput($_POST['originalCompanyName'] ?? '');
+    $is_placed = sanitizeInput($_POST['is_placed'] ?? '');
 
     // Handle new company input if needed
     if ($isNewCompany) {
@@ -72,7 +73,7 @@ try {
 
     // Validation
     if (empty($registerNo) || empty($studentName) || empty($companyName) || 
-        $yearOfGraduation <= 0 || empty($companyType) || $package <= 0) {
+        $yearOfGraduation <= 0 || empty($companyType) || $package <= 0 || empty($is_placed)) {
         throw new Exception('Please fill in all required fields');
     }
 
@@ -154,6 +155,7 @@ try {
             $updatePlacementSQL = "UPDATE placement SET 
                                    company_type = :company_type,
                                    package = :package,
+                                   is_placed = :is_placed,
                                    round1 = :round1,
                                    round2 = :round2,
                                    round3 = :round3,
@@ -167,6 +169,7 @@ try {
             $updatePlacementStmt->bindParam(':company_name', $originalCompanyName);
             $updatePlacementStmt->bindParam(':company_type', $companyType);
             $updatePlacementStmt->bindParam(':package', $package);
+            $updatePlacementStmt->bindParam(':is_placed', $is_placed);
             
             for ($i = 1; $i <= 6; $i++) {
                 $roundKey = "round$i";
@@ -231,14 +234,15 @@ try {
         }
 
         // Insert new placement record
-        $insertPlacementSQL = "INSERT INTO placement (register_no, company_name, company_type, package, round1, round2, round3, round4, round5, round6) 
-                               VALUES (:register_no, :company_name, :company_type, :package, :round1, :round2, :round3, :round4, :round5, :round6)";
+        $insertPlacementSQL = "INSERT INTO placement (register_no, company_name, company_type, package, is_placed, round1, round2, round3, round4, round5, round6) 
+                               VALUES (:register_no, :company_name, :company_type, :package, :is_placed, :round1, :round2, :round3, :round4, :round5, :round6)";
         
         $insertPlacementStmt = $pdo->prepare($insertPlacementSQL);
         $insertPlacementStmt->bindParam(':register_no', $registerNo);
         $insertPlacementStmt->bindParam(':company_name', $companyName);
         $insertPlacementStmt->bindParam(':company_type', $companyType);
         $insertPlacementStmt->bindParam(':package', $package);
+        $insertPlacementStmt->bindParam(':is_placed', $is_placed);
         
         for ($i = 1; $i <= 6; $i++) {
             $roundKey = "round$i";

@@ -35,7 +35,8 @@ try {
                 s.name,
                 s.phone_no,
                 s.mail,
-                p.package
+                p.package,
+                p.is_placed
             FROM student s 
             INNER JOIN placement p ON s.register_no = p.register_no 
             WHERE s.year_of_graduation = :batch AND p.company_name = :company 

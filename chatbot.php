@@ -807,213 +807,216 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
     </div>
 
     <script>
-        function sendMessage() {
-            const input = document.getElementById('message-input');
-            const message = input.value.trim();
-            const sendBtn = document.getElementById('send-btn');
-            
-            if (!message) return;
-            
-            addMessage(message, 'user');
-            input.value = '';
-            
-            sendBtn.disabled = true;
-            sendBtn.innerHTML = '<span class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span></span>';
-            
-            const thinkingId = addMessage(
-                '<div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> AI is analyzing...</div>', 
-                'assistant', 
-                true
-            );
-            
-            // FIXED: Call chatbot.php instead of /api/chat
-            fetch('chatbot.php', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({message: message})
-            })
-            .then(response => response.json())
-            .then(data => {
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = 'Send';
-                
-                const thinkingElem = document.getElementById(thinkingId);
-                if (thinkingElem) thinkingElem.remove();
-                
-                if (data.success) {
-                    addMessage(data.response, 'assistant');
-                } else {
-                    addMessage('❌ ' + (data.error || 'An error occurred'), 'assistant');
-                }
-            })
-            .catch(error => {
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = 'Send';
-                
-                const thinkingElem = document.getElementById(thinkingId);
-                if (thinkingElem) thinkingElem.remove();
-                
-                addMessage('❌ Network error: ' + error.message, 'assistant');
-            });
-        }
+    function sendMessage() {
+        const input = document.getElementById('message-input');
+        const message = input.value.trim();
+        const sendBtn = document.getElementById('send-btn');
         
-        function sendExample(message) {
-            document.getElementById('message-input').value = message;
-            sendMessage();
-        }
+        if (!message) return;
         
-        function addMessage(content, role, isTemp = false) {
-            const messagesContainer = document.getElementById('chat-messages');
-            const messageId = 'msg-' + Date.now();
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${role}`;
-            messageDiv.id = isTemp ? messageId : '';
-            
-            const prefix = role === 'user' ? '👤 You:' : '🤖 AI:';
-            messageDiv.innerHTML = `<strong>${prefix}</strong> ${content}`;
-            
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            
-            return messageId;
-        }
+        addMessage(message, 'user');
+        input.value = '';
         
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') sendMessage();
-        }
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<span class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span></span>';
         
-        function testSystem() {
-            const dbStatus = document.getElementById('db-status');
-            const aiStatus = document.getElementById('ai-status');
-            
-            dbStatus.innerHTML = '<div class="ai-thinking">Testing...</div>';
-            aiStatus.innerHTML = '<div class="ai-thinking">Testing...</div>';
-            
-            // FIXED: Call chatbot.php?action=test
-            fetch('chatbot.php?action=test')
-            .then(response => response.json())
-            .then(data => {
-                dbStatus.innerHTML = data.db_status || '❌ No status';
-                dbStatus.className = (data.db_status && data.db_status.startsWith('✅')) ? 'status-success' : 'status-error';
-                
-                aiStatus.innerHTML = data.ai_status || '❌ No status';
-                aiStatus.className = (data.ai_status && data.ai_status.startsWith('✅')) ? 'status-success' : 'status-error';
-            })
-            .catch(error => {
-                dbStatus.innerHTML = '❌ Test failed: ' + error.message;
-                dbStatus.className = 'status-error';
-                aiStatus.innerHTML = '❌ Test failed';
-                aiStatus.className = 'status-error';
-            });
-        }
+        const thinkingId = addMessage(
+            '<div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> AI is analyzing...</div>', 
+            'assistant', 
+            true
+        );
         
-        function loadCompanies() {
-            const companyList = document.getElementById('company-list');
-            companyList.innerHTML = '<div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> Loading...</div>';
+        // FIXED: Call chatbot.php instead of /api/chat
+        fetch('chatbot.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: message})
+        })
+        .then(response => response.json())
+        .then(data => {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = 'Send';
             
-            // FIXED: Call chatbot.php?action=companies
-            fetch('chatbot.php?action=companies')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.companies && data.companies.length > 0) {
-                    let html = '';
-                    data.companies.forEach(company => {
-                        html += `<button class="example-btn" onclick="getInterviewPrep('${company.replace(/'/g, "\\'")}')" style="margin: 5px 0; width: 100%;">${company}</button>`;
-                    });
-                    companyList.innerHTML = html;
-                } else {
-                    companyList.innerHTML = '<div class="status-error">No companies found' + (data.error ? ': ' + data.error : '') + '</div>';
-                }
-            })
-            .catch(error => {
-                companyList.innerHTML = '<div class="status-error">❌ Failed to load: ' + error.message + '</div>';
-            });
-        }
-        
-        function getInterviewPrep(companyName) {
-            const userMessage = `Tell me about interview preparation for ${companyName}`;
-            addMessage(userMessage, 'user');
-
-            // On mobile, scroll to the chat section after clicking a company
-            if (window.innerWidth <= 1024) {
-                const mainContent = document.querySelector('.main-content');
-                if (mainContent) {
-                    mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+            const thinkingElem = document.getElementById(thinkingId);
+            if (thinkingElem) thinkingElem.remove();
+            
+            if (data.success) {
+                addMessage(data.response, 'assistant');
+            } else {
+                addMessage('❌ ' + (data.error || 'An error occurred'), 'assistant');
             }
+        })
+        .catch(error => {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = 'Send';
             
-            const thinkingId = addMessage(
-                `<div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> Generating guide for ${companyName}...</div>`, 
-                'assistant', 
-                true
-            );
+            const thinkingElem = document.getElementById(thinkingId);
+            if (thinkingElem) thinkingElem.remove();
             
-            fetch('chatbot.php', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({company: companyName})
-            })
-            .then(response => response.json())
-            .then(data => {
-                const thinkingElem = document.getElementById(thinkingId);
-                if (thinkingElem) thinkingElem.remove();
-
-                if (data.success) {
-                    addMessage(data.response, 'assistant');
-                } else {
-                    addMessage('❌ ' + (data.error || 'Failed to generate guide'), 'assistant');
-                }
-            })
-            .catch(error => {
-                const thinkingElem = document.getElementById(thinkingId);
-                if (thinkingElem) thinkingElem.remove();
-                addMessage('❌ Network error: ' + error.message, 'assistant');
-            });
-        }
-        
-        // Test system on load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mobile menu functionality
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const mobileMenu = document.getElementById('mobileMenu');
-            const mobileMenuClose = document.getElementById('mobileMenuClose');
-
-            if (mobileMenuBtn) {
-                mobileMenuBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    mobileMenu.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                });
-            }
-
-            if (mobileMenuClose) {
-                mobileMenuClose.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    mobileMenu.classList.remove('active');
-                    document.body.style.overflow = '';
-                });
-            }
-
-            if (mobileMenu) {
-                mobileMenu.addEventListener('click', function(e) {
-                    if (e.target === mobileMenu) {
-                        mobileMenu.classList.remove('active');
-                        document.body.style.overflow = '';
-                    }
-                });
-            }
-
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && mobileMenu && mobileMenu.classList.contains('active')) {
-                    mobileMenu.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            });
-
-            testSystem();
-            loadCompanies();
+            addMessage('❌ Network error: ' + error.message, 'assistant');
         });
-    </script>
+    }
+    
+    function sendExample(message) {
+        document.getElementById('message-input').value = message;
+        sendMessage();
+    }
+    
+    function addMessage(content, role, isTemp = false) {
+        const messagesContainer = document.getElementById('chat-messages');
+        const messageId = 'msg-' + Date.now();
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${role}`;
+        messageDiv.id = isTemp ? messageId : '';
+        
+        const prefix = role === 'user' ? '👤 You:' : '🤖 AI:';
+        messageDiv.innerHTML = `<strong>${prefix}</strong> ${content}`;
+        
+        messagesContainer.appendChild(messageDiv);
+        
+        // REMOVED: Automatic scrolling to bottom
+        // messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        return messageId;
+    }
+    
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') sendMessage();
+    }
+    
+    function testSystem() {
+        const dbStatus = document.getElementById('db-status');
+        const aiStatus = document.getElementById('ai-status');
+        
+        dbStatus.innerHTML = '<div class="ai-thinking">Testing...</div>';
+        aiStatus.innerHTML = '<div class="ai-thinking">Testing...</div>';
+        
+        // FIXED: Call chatbot.php?action=test
+        fetch('chatbot.php?action=test')
+        .then(response => response.json())
+        .then(data => {
+            dbStatus.innerHTML = data.db_status || '❌ No status';
+            dbStatus.className = (data.db_status && data.db_status.startsWith('✅')) ? 'status-success' : 'status-error';
+            
+            aiStatus.innerHTML = data.ai_status || '❌ No status';
+            aiStatus.className = (data.ai_status && data.ai_status.startsWith('✅')) ? 'status-success' : 'status-error';
+        })
+        .catch(error => {
+            dbStatus.innerHTML = '❌ Test failed: ' + error.message;
+            dbStatus.className = 'status-error';
+            aiStatus.innerHTML = '❌ Test failed';
+            aiStatus.className = 'status-error';
+        });
+    }
+    
+    function loadCompanies() {
+        const companyList = document.getElementById('company-list');
+        companyList.innerHTML = '<div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> Loading...</div>';
+        
+        // FIXED: Call chatbot.php?action=companies
+        fetch('chatbot.php?action=companies')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.companies && data.companies.length > 0) {
+                let html = '';
+                data.companies.forEach(company => {
+                    html += `<button class="example-btn" onclick="getInterviewPrep('${company.replace(/'/g, "\\'")}')" style="margin: 5px 0; width: 100%;">${company}</button>`;
+                });
+                companyList.innerHTML = html;
+            } else {
+                companyList.innerHTML = '<div class="status-error">No companies found' + (data.error ? ': ' + data.error : '') + '</div>';
+            }
+        })
+        .catch(error => {
+            companyList.innerHTML = '<div class="status-error">❌ Failed to load: ' + error.message + '</div>';
+        });
+    }
+    
+    function getInterviewPrep(companyName) {
+        const userMessage = `Tell me about interview preparation for ${companyName}`;
+        addMessage(userMessage, 'user');
+
+        // On mobile, scroll to the chat section after clicking a company
+        if (window.innerWidth <= 1024) {
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        
+        const thinkingId = addMessage(
+            `<div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> Generating guide for ${companyName}...</div>`, 
+            'assistant', 
+            true
+        );
+        
+        fetch('chatbot.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({company: companyName})
+        })
+        .then(response => response.json())
+        .then(data => {
+            const thinkingElem = document.getElementById(thinkingId);
+            if (thinkingElem) thinkingElem.remove();
+
+            if (data.success) {
+                addMessage(data.response, 'assistant');
+            } else {
+                addMessage('❌ ' + (data.error || 'Failed to generate guide'), 'assistant');
+            }
+        })
+        .catch(error => {
+            const thinkingElem = document.getElementById(thinkingId);
+            if (thinkingElem) thinkingElem.remove();
+            addMessage('❌ Network error: ' + error.message, 'assistant');
+        });
+    }
+    
+    // Test system on load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mobile menu functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                mobileMenu.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+        }
+
+        if (mobileMenuClose) {
+            mobileMenuClose.addEventListener('click', function(e) {
+                e.stopPropagation();
+                mobileMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
+
+        if (mobileMenu) {
+            mobileMenu.addEventListener('click', function(e) {
+                if (e.target === mobileMenu) {
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileMenu && mobileMenu.classList.contains('active')) {
+                mobileMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        testSystem();
+        loadCompanies();
+    });
+</script>
+
 </body>
 </html>

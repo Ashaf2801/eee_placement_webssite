@@ -38,7 +38,9 @@ try {
                 p.round5,
                 p.round6,
                 p.company_name,
+                p.company_type,
                 p.package,
+                p.is_placed,
                 s.name
             FROM placement p 
             INNER JOIN student s ON p.register_no = s.register_no 

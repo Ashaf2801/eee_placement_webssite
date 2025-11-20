@@ -1139,6 +1139,20 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Placed *</label>
+                        <div style="display: flex; gap: 20px; margin-top: 10px;">
+                            <label style="font-weight: normal; display: flex; align-items: center; gap: 5px;">
+                                <input type="radio" name="is_placed" value="Yes" required> Yes
+                            </label>
+                            <label style="font-weight: normal; display: flex; align-items: center; gap: 5px;">
+                                <input type="radio" name="is_placed" value="No" required> No
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="rounds-section">
                     <h3><i class="fas fa-clipboard-list"></i> Interview Rounds Experience (Leave empty if not applicable)</h3>
                     
@@ -1558,6 +1572,13 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                         document.getElementById('package').value = parseFloat(experience.package);
                         document.getElementById('companyType').value = experience.company_type || '';
                         
+                        if (experience.is_placed) {
+                            const placedRadio = document.querySelector(`input[name="is_placed"][value="${experience.is_placed}"]`);
+                            if (placedRadio) {
+                                placedRadio.checked = true;
+                            }
+                        }
+                        
                         setTimeout(() => {
                             document.getElementById('companyName').value = companyName;
                         }, 100);
@@ -1668,6 +1689,7 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                                     <tr>
                                         <th>S.No</th>
                                         <th>Name</th>
+                                        <th>Placed</th>
                                         <th>Phone</th>
                                         <th>Email</th>
                                         <th>Package (LPA)</th>
@@ -1684,10 +1706,15 @@ $canEdit = in_array($currentUserType, ['admin', 'faculty']);
                                     <button class="delete-btn" onclick="deleteExperience('${student.register_no}', '${currentCompany}', '${student.name}')"><i class="fas fa-trash"></i> Delete</button>
                                 </td>` : '';
                             
+                            const placedStatus = student.is_placed === 'Yes' 
+                                ? '<span style="color: green; font-weight: bold;">Yes</span>' 
+                                : '<span style="color: red; font-weight: bold;">No</span>';
+
                             tableHTML += `
                                 <tr>
                                     <td>${index + 1}</td>
                                     <td><span class="student-name-link" onclick="showExperience('${student.register_no}', '${student.name}', '${currentCompany}')">${student.name}</span></td>
+                                    <td>${placedStatus}</td>
                                     <td>${student.phone_no || 'N/A'}</td>
                                     <td>${student.mail || 'N/A'}</td>
                                     <td>${parseFloat(student.package).toFixed(2)}</td>

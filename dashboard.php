@@ -901,10 +901,8 @@ $currentYear = date('Y');
         <!-- Tree Structure -->
          <div class="intro-container">
             <h2 class="intro-title">Introduction</h2>
-            <div class="intro-content">
-                <p>
-                    <!-- Add your introduction paragraph here -->
-                </p>
+            <div class="intro-content"><p>Welcome to the EEE Department's Placement Preparation website! This platform is designed to help you prepare for your placement journey. Whether you're looking for core technical knowledge, software skills, or aptitude training, you'll find a wealth of resources here. Navigate through the preparation topics, explore study materials, Explore the experiences of placed students and leverage AI-powered tools to enhance your placement preparation. In the 'Placement Experience' section, gain insights from real-world experiences shared by your seniors, offering valuable perspectives on company-specific processes and interview strategies. Then, head over to the 'Prep with AI' section, where you can utilize cutting-edge AI tools designed to simulate interview scenarios, assess your aptitude, and provide personalized guidance. These features are designed to give you a competitive edge as you prepare for your placement journey. Good Luck for your placements!</p>
+
             </div>
         </div>
 
@@ -1408,18 +1406,26 @@ $currentYear = date('Y');
                     ]
                 },
                 'DIGITAL SIGNAL PROCESSING':{
-                    overview: '',
+                    overview:'Digital Signal Processing (DSP) involves the analysis, manipulation, and transformation of signals using digital systems. It includes sampling, filtering, convolution, transforms, and applications in audio, communication, biomedical, and image processing' ,
                     resources: [
-                        { title: '', link: '' }
+                        { title: 'Digital signal processing -Ananda kumar', link: 'https://drive.google.com/drive/folders/1d3mogb7O5-YEUQg3qbZ09HOaskHBt3hd'},
+                        { title: 'Digital Signal Processing - Nalbalwar', link: 'https://drive.google.com/drive/folders/10JcuUntOtT63SJKE7e8bkKbJEfViUwf9' }
                     ],
-                    keyTopics: [
-                        ''
+                    keyTopics: ['Sampling theorem and aliasing',
+                                'Discrete-time signals and systems',
+                                'Z-transform and its properties',
+                                'DFT and FFT algorithms',
+                                'FIR filter design (Window method)',
+                                'IIR filter design (Butterworth, Chebyshev)',
+                                'Convolution (linear & circular)',
+                                'Correlation and spectral analysis',
+                                'DSP applications in audio, speech, biomedical, and communication'
                     ],
                     videos: [
-                        { title: '', link: '' }
+                        { title: 'Signals and systems-Neso Academy' , link:'https://youtube.com/playlist?list=PLBlnK6fEyqRhG6s3jYIU48CqsT5cyiDTO&si=1kZOImzTw1ODynME' }
                     ],
                     additionalResources: [
-                        {title: '', link: '', description: '' }
+                        {title:'Sanfoundry DSP Questions', link:'https://www.sanfoundry.com/1000-digital-signal-processing-questions-answers/', description:' DSP 1000 Practice Questions' }
                     ]
                 },
                 'POWER SYSTEM':{
